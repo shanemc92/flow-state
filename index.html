@@ -9,214 +9,253 @@
 <title>flow-state</title>
 
 <style>
-
 /* ============================================================
    flow-state
-   One structural stylesheet driven by per-theme design tokens.
-   Two themes, same terminal styling, opposite palettes.
+   Operational tooling for incident process work.
+   One token set, two palettes. Sans for chrome, mono for data.
    ============================================================ */
 
 :root {
-    --wrap: 1180px;
-    --font: 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+    --wrap: 1600px;
+    --read: 800px;
+    --ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 }
 
-/* ---------- Tokens: Dark (default) ---------- */
+/* ---------- Dark (default) ---------- */
 :root,
 html[data-theme="dark"] {
-    --bg:          #0b0e14;
-    --card:        #161b25;
-    --sunken:      #11161f;
-    --raised:      #1b212d;
-    --line:        #262d3a;
-    --line-soft:   #1e2431;
-    --fg:          #c7ccd6;
-    --fg-dim:      #7b8496;
-    --fg-faint:    #59616f;
-    --accent:      #58a6ff;
-    --accent-soft: rgba(88, 166, 255, 0.14);
-    --accent-ink:  #06111f;
-    --toggle-on:   #3fb950;
+    --bg:          #14161b;
+    --card:        #1b1e25;
+    --sunken:      #181b21;
+    --raised:      #22262f;
+    --line:        #2a2f39;
+    --line-soft:   #23272f;
+    --fg:          #dfe2e8;
+    --fg-dim:      #9aa2b1;
+    --fg-faint:    #6b7484;
+    --accent:      #8a8af0;
+    --accent-soft: rgba(138, 138, 240, 0.13);
+    --accent-ink:  #10101c;
+    --toggle-on:   #4ec27f;
     --toggle-ink:  #06210c;
-    --radius:      10px;
-    --radius-sm:   6px;
-    --shadow:      0 18px 50px -18px rgba(0, 0, 0, 0.75);
-    --bad:         #f87171;
-    --warn:        #d29922;
-    --ok:          #3fb950;
+    --radius:      12px;
+    --radius-sm:   8px;
+    --shadow:      0 1px 2px rgba(0, 0, 0, 0.4);
+    --shadow-lift: 0 24px 60px -24px rgba(0, 0, 0, 0.8);
+    --bad:         #f2777a;
+    --warn:        #e0a34a;
+    --ok:          #4ec27f;
 }
 
-/* ---------- Tokens: Light ---------- */
+/* ---------- Light ---------- */
 html[data-theme="light"] {
-    --bg:          #e9edf2;
+    --bg:          #f6f6f4;
     --card:        #ffffff;
-    --sunken:      #f3f5f8;
-    --raised:      #fbfcfd;
-    --line:        #d3dae3;
-    --line-soft:   #e5eaf0;
-    --fg:          #0e1620;
-    --fg-dim:      #5f6b7a;
-    --fg-faint:    #8b96a5;
-    --accent:      #0f766e;
-    --accent-soft: rgba(15, 118, 110, 0.10);
+    --sunken:      #f1f1ee;
+    --raised:      #fbfbfa;
+    --line:        #e0e0db;
+    --line-soft:   #ebebe6;
+    --fg:          #1a1c20;
+    --fg-dim:      #5e636d;
+    --fg-faint:    #8b909a;
+    --accent:      #5250c8;
+    --accent-soft: rgba(82, 80, 200, 0.08);
     --accent-ink:  #ffffff;
-    --toggle-on:   #0f766e;
+    --toggle-on:   #1f8a4c;
     --toggle-ink:  #ffffff;
-    --radius:      10px;
-    --radius-sm:   6px;
-    --shadow:      0 1px 2px rgba(16, 24, 40, 0.05), 0 14px 36px -16px rgba(16, 24, 40, 0.28);
-    --bad:         #dc2626;
-    --warn:        #b45309;
-    --ok:          #0f766e;
+    --radius:      12px;
+    --radius-sm:   8px;
+    --shadow:      0 1px 2px rgba(20, 22, 27, 0.06);
+    --shadow-lift: 0 24px 60px -28px rgba(20, 22, 27, 0.28);
+    --bad:         #c0392f;
+    --warn:        #9a6212;
+    --ok:          #1f8a4c;
 }
 
-/* ============================================================
-   Base
-   ============================================================ */
 * { box-sizing: border-box; }
+
+html { scrollbar-gutter: stable; }
 
 body {
     margin: 0;
-    padding: 28px 20px 48px;
     min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     background: var(--bg);
     color: var(--fg);
-    font-family: var(--font);
+    font-family: var(--ui);
     font-size: 13.5px;
-    line-height: 1.55;
+    line-height: 1.5;
     -webkit-font-smoothing: antialiased;
 }
 
 ::selection { background: var(--accent); color: var(--accent-ink); }
 ::placeholder { color: var(--fg-faint); opacity: 1; }
-:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+
+h1, h2, h3 { margin: 0; font-weight: 600; }
 
 /* ============================================================
-   Window
+   Shell
    ============================================================ */
-.container {
-    width: 100%;
-    max-width: var(--wrap);
+.container { width: 100%; }
+
+.topbar {
+    position: sticky;
+    top: 0;
+    z-index: 60;
     background: var(--card);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    box-shadow: var(--shadow);
-    overflow: hidden;
-}
-
-.titlebar {
-    position: relative;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 11px 12px 11px 16px;
-    background: var(--sunken);
-    border-bottom: 1px solid var(--line-soft);
-}
-.dot { width: 11px; height: 11px; border-radius: 50%; }
-.dot:nth-child(1) { background: #ff5f56; }
-.dot:nth-child(2) { background: #ffbd2e; }
-.dot:nth-child(3) { background: #27c93f; }
-
-.titlebar-title {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: 12.5px;
-    color: var(--fg-dim);
-    pointer-events: none;
-    white-space: nowrap;
-}
-.titlebar .spacer { flex: 1; }
-
-.icon-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 27px;
-    height: 27px;
-    padding: 0;
-    color: var(--fg-dim);
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: var(--radius-sm);
-    cursor: pointer;
-    transition: color 0.15s, border-color 0.15s;
-}
-.icon-btn:hover { color: var(--accent); border-color: var(--line); }
-.icon-btn svg {
-    width: 15px; height: 15px;
-    fill: none; stroke: currentColor;
-    stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
-}
-html[data-theme="dark"]  .ic-moon { display: none; }
-html[data-theme="light"] .ic-sun  { display: none; }
-
-/* ---------- Tab strip ---------- */
-.tabs {
-    display: flex;
-    padding: 0 8px;
-    background: var(--sunken);
     border-bottom: 1px solid var(--line);
+}
+.topbar-in {
+    max-width: var(--wrap);
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 12px 26px 0;
+}
+.mark {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    font-size: 14.5px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+.mark svg { width: 20px; height: 20px; fill: none; stroke: var(--accent); stroke-width: 1.7; }
+.rule { width: 1px; height: 18px; background: var(--line); }
+.subtitle {
+    min-width: 0;
+    flex: 1;
+    font-size: 13px;
+    color: var(--fg-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.tabs {
+    max-width: var(--wrap);
+    margin: 0 auto;
+    display: flex;
+    gap: 2px;
+    padding: 6px 26px 0;
     overflow-x: auto;
     scrollbar-width: none;
 }
 .tabs::-webkit-scrollbar { display: none; }
 .tab {
     font: inherit;
-    font-size: 12.5px;
+    font-size: 13px;
     color: var(--fg-dim);
     background: transparent;
     border: 0;
     border-bottom: 2px solid transparent;
-    padding: 9px 15px;
+    padding: 9px 12px 10px;
     cursor: pointer;
     white-space: nowrap;
-    transition: color 0.15s, background 0.15s, border-color 0.15s;
+    transition: color 0.12s, border-color 0.12s;
 }
 .tab:hover { color: var(--fg); }
-.tab[aria-selected="true"] {
-    color: var(--accent);
-    background: var(--card);
-    border-bottom-color: var(--accent);
-}
+.tab[aria-selected="true"] { color: var(--fg); border-bottom-color: var(--accent); }
 
-.body { padding: 20px 22px 24px; }
+.body {
+    max-width: var(--wrap);
+    margin: 0 auto;
+    padding: 22px 26px 64px;
+}
 section[hidden] { display: none; }
 
-.prompt { margin-bottom: 6px; font-size: 13px; }
-.prompt .path { color: var(--accent); }
-.prompt .chev { color: var(--fg-faint); }
-.comment { color: var(--fg-faint); font-size: 12.5px; margin-bottom: 20px; }
+.icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    color: var(--fg-dim);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: color 0.12s, border-color 0.12s, background 0.12s;
+}
+.icon-btn:hover { color: var(--fg); background: var(--sunken); border-color: var(--line); }
+.icon-btn svg {
+    width: 16px; height: 16px;
+    fill: none; stroke: currentColor;
+    stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
+}
+html[data-theme="dark"]  .ic-moon { display: none; }
+html[data-theme="light"] .ic-sun  { display: none; }
 
 /* ============================================================
-   Sections
+   Workspace columns
    ============================================================ */
+.split .buildwrap {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 28px;
+    align-items: start;
+}
+.buildmain, .buildside { min-width: 0; }
+.split .buildside { position: sticky; top: 108px; }
+.buildside:empty { display: none; }
+.split .buildside .panel { border-top: 0; padding-top: 4px; }
+
+#pane-about { max-width: var(--read); margin: 0 auto; }
+
+.runwrap {
+    display: grid;
+    grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+    gap: 26px;
+    align-items: start;
+}
+.runmain, .runrail { min-width: 0; }
+.runrail { position: sticky; top: 108px; }
+
+/* ============================================================
+   Blocks
+   ============================================================ */
+.panel { padding: 20px 0; border-top: 1px solid var(--line-soft); }
+#runLists > .panel:first-child,
+.runmain > .panel:first-child,
+.runrail > .panel:first-child,
+section > .panel:first-child { border-top: 0; padding-top: 4px; }
+
 .section-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    margin-bottom: 12px;
+    margin-bottom: 14px;
     flex-wrap: wrap;
 }
-.section-header span {
-    font-size: 11px;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
-    color: var(--fg-dim);
-}
-.section-header span::before { content: '// '; color: var(--fg-faint); }
+.section-header span { font-size: 13px; font-weight: 600; color: var(--fg); }
 
-.panel {
-    background: var(--sunken);
-    border: 1px solid var(--line-soft);
-    border-radius: var(--radius-sm);
-    padding: 16px;
-    margin-bottom: 16px;
+/* Boxed blocks: the canvas, the run rail, the run header */
+#tlHeadPanel, #tlAddPanel,
+#runHeadPanel, #runFlowPanel, #runTlPanel, #runOffPanel {
+    padding: 16px 18px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    margin-bottom: 18px;
+}
+#runHeadPanel, #tlHeadPanel, #tlAddPanel { border-top: 1px solid var(--line); }
+#tlLists > .panel:first-child { border-top: 0; padding-top: 4px; }
+.ev-src { flex: 0 0 auto; }
+.tl-when { flex: 0 0 auto; min-width: 108px; font-family: var(--font); font-size: 11.5px; color: var(--fg-dim); padding-top: 1px; }
+#runFlowPanel, #runTlPanel, #runOffPanel { border-top: 1px solid var(--line); }
+
+.toolbar {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: 0 0 18px;
+    border-bottom: 1px solid var(--line-soft);
+    margin-bottom: 4px;
 }
 
 /* ============================================================
@@ -226,207 +265,252 @@ section[hidden] { display: none; }
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 8px 13px;
+    gap: 7px;
+    padding: 7px 13px;
     font: inherit;
-    font-size: 12.5px;
+    font-size: 13px;
     color: var(--fg);
     background: var(--raised);
     border: 1px solid var(--line);
     border-radius: var(--radius-sm);
     cursor: pointer;
-    transition: border-color 0.15s, background 0.15s, color 0.15s;
+    transition: border-color 0.12s, background 0.12s, color 0.12s;
 }
-.btn:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
-.btn:active { transform: scale(0.985); }
-.btn:disabled { opacity: 0.55; cursor: default; }
-.btn:disabled:hover { color: var(--fg); border-color: var(--line); background: var(--raised); }
+.btn:hover { border-color: var(--fg-faint); }
+.btn:active { transform: translateY(0.5px); }
+.btn:disabled { opacity: 0.5; cursor: default; }
+.btn:disabled:hover { border-color: var(--line); }
 
 .btn-primary { color: var(--accent-ink); background: var(--accent); border-color: var(--accent); }
-.btn-primary:hover { color: var(--accent-ink); background: var(--accent); filter: brightness(1.12); }
-.btn-danger:hover { color: var(--bad); border-color: var(--bad); background: transparent; }
-.btn-sm { padding: 5px 9px; font-size: 12px; }
+.btn-primary:hover { border-color: var(--accent); filter: brightness(1.08); }
+.btn-danger:hover { color: var(--bad); border-color: var(--bad); }
+.btn-sm { padding: 5px 9px; font-size: 12.5px; }
+.btn-ghost { background: transparent; border-color: transparent; color: var(--fg-dim); }
+.btn-ghost:hover { color: var(--fg); background: var(--sunken); border-color: var(--line); }
 
 .field {
     width: 100%;
     font: inherit;
-    font-size: 12.5px;
+    font-size: 13px;
     color: var(--fg);
-    background: var(--raised);
+    background: var(--card);
     border: 1px solid var(--line);
     border-radius: var(--radius-sm);
     padding: 7px 10px;
     outline: none;
-    transition: border-color 0.15s;
+    transition: border-color 0.12s, background 0.12s;
 }
 .field:hover { border-color: var(--fg-faint); }
 .field:focus { border-color: var(--accent); }
-textarea.field { line-height: 1.6; resize: vertical; }
+.field:disabled { background: var(--sunken); color: var(--fg-dim); }
+textarea.field { line-height: 1.55; resize: vertical; }
 select.field { cursor: pointer; }
 
 label.f {
     display: flex;
     flex-direction: column;
-    gap: 6px;
-    font-size: 11px;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
+    gap: 5px;
+    font-size: 12px;
     color: var(--fg-dim);
 }
 
-.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; }
 .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .spacer { flex: 1; }
 
-.note { font-size: 11.5px; line-height: 1.65; color: var(--fg-dim); }
-.note code { color: var(--accent); }
-.log { font-size: 12px; color: var(--fg-dim); }
+.note { font-size: 12.5px; line-height: 1.6; color: var(--fg-dim); }
+.note code { font-family: var(--font); font-size: 12px; color: var(--fg); }
+.note b { color: var(--fg); font-weight: 600; }
+
+.log { font-size: 12.5px; color: var(--fg-dim); }
 .log .ok { color: var(--ok); } .log .warn { color: var(--warn); }
-.log .bad { color: var(--bad); } .log .a { color: var(--accent); }
+.log .bad { color: var(--bad); } .log .a { color: var(--fg); font-weight: 600; }
 
 .empty {
-    padding: 26px;
-    text-align: center;
+    padding: 22px;
+    font-size: 12.5px;
     color: var(--fg-dim);
-    border: 1px dashed var(--line);
+    background: var(--sunken);
+    border: 1px solid var(--line-soft);
     border-radius: var(--radius-sm);
 }
 
+.drop {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    align-items: center;
+    padding: 22px;
+    font-size: 12.5px;
+    color: var(--fg-dim);
+    text-align: center;
+    background: var(--sunken);
+    border: 1px dashed var(--line);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: border-color 0.12s, background 0.12s;
+}
+.drop b { color: var(--fg); font-weight: 600; }
+.drop:hover, .drop.over { border-color: var(--accent); background: var(--accent-soft); }
+
 /* ============================================================
-   Step cards (builder outline)
+   Step cards
    ============================================================ */
 .step {
-    background: var(--raised);
+    background: var(--card);
     border: 1px solid var(--line);
     border-left: 3px solid var(--line);
     border-radius: var(--radius-sm);
-    padding: 11px 12px;
+    padding: 12px 13px;
     margin-bottom: 10px;
 }
 .step.t-start, .step.t-end { border-left-color: var(--accent); }
 .step.t-decision { border-left-color: var(--warn); }
 .step.t-parallel { border-left-color: var(--ok); }
 
-.step-head { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+.step-head { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 9px; }
 .ref {
     flex: 0 0 auto;
-    min-width: 30px;
-    padding: 3px 7px;
-    text-align: center;
+    padding: 2px 7px;
+    font-family: var(--font);
     font-size: 11.5px;
-    color: var(--accent);
-    background: var(--accent-soft);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-sm);
+    color: var(--fg-dim);
+    background: var(--sunken);
+    border-radius: 5px;
 }
-.step-head select.field { width: auto; min-width: 104px; }
+.step-head select.field { width: auto; min-width: 100px; }
 .step-label { width: 100%; }
+.step-title { font-size: 14.5px; font-weight: 600; line-height: 1.35; margin-bottom: 7px; }
+.step-meta { font-size: 12.5px; color: var(--fg-dim); }
+.step-meta b { color: var(--fg); font-weight: 600; }
 
-.outs { margin-top: 9px; padding-left: 12px; border-left: 1px dashed var(--line); }
+.outs { margin-top: 10px; padding-left: 12px; border-left: 1px solid var(--line-soft); }
 .out-row { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; flex-wrap: wrap; }
-.out-row .arrow { color: var(--fg-faint); font-size: 12px; }
-.out-row input.field { flex: 1 1 130px; min-width: 90px; }
-.out-row select.field { flex: 2 1 190px; min-width: 140px; }
+.out-row .arrow { color: var(--fg-faint); }
+.out-row input.field { flex: 1 1 120px; min-width: 90px; }
+.out-row select.field { flex: 2 1 180px; min-width: 140px; }
 
 /* ============================================================
    Canvas
    ============================================================ */
 .canvas-wrap {
-    position: relative;
     overflow: auto;
-    max-height: 560px;
-    background: var(--raised);
+    height: calc(100vh - 196px);
+    min-height: 420px;
+    background: var(--card);
     border: 1px solid var(--line);
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius);
 }
 .canvas-wrap svg { display: block; }
 
 .nd-box rect, .nd-box polygon { stroke-width: 1.4; }
-.nd-action rect      { fill: var(--card); stroke: var(--line); }
+.nd-action rect      { fill: var(--sunken); stroke: var(--line); }
 .nd-start rect,
 .nd-end rect         { fill: var(--accent-soft); stroke: var(--accent); }
-.nd-decision polygon { fill: var(--card); stroke: var(--warn); }
-.nd-parallel polygon { fill: var(--card); stroke: var(--ok); }
+.nd-decision polygon { fill: var(--sunken); stroke: var(--warn); }
+.nd-parallel polygon { fill: var(--sunken); stroke: var(--ok); }
 .nd-box text { fill: var(--fg); font-family: var(--font); font-size: 12px; }
-.nd-box .nd-kind { fill: var(--fg-faint); font-size: 9.5px; letter-spacing: 0.08em; }
-.nd-box .nd-ref  { fill: var(--fg-dim); font-size: 9.5px; }
+.nd-box .nd-ref { fill: var(--fg-faint); font-size: 10px; }
 .nd-box, .el-box { cursor: grab; touch-action: none; }
-.el-box.dragging .elabel-bg { stroke: var(--accent); }
 .nd-box.dragging { cursor: grabbing; }
-.edge { fill: none; stroke: var(--fg-faint); stroke-width: 1.4; }
-.elabel { fill: var(--fg-dim); font-family: var(--font); font-size: 10.5px; }
-.elabel-bg { fill: var(--raised); stroke: var(--line-soft); stroke-width: 1; }
-.lane-band { fill: none; stroke: var(--line); stroke-dasharray: 4 4; }
 .nd-now rect, .nd-now polygon { stroke: var(--accent); stroke-width: 3; }
-.nd-done rect, .nd-done polygon { opacity: 0.4; }
-.nd-done text { opacity: 0.45; }
-.lane-name { fill: var(--fg-dim); font-family: var(--font); font-size: 10.5px; letter-spacing: 0.08em; }
+.nd-done rect, .nd-done polygon { opacity: 0.35; }
+.nd-done text { opacity: 0.4; }
+
+.edge { fill: none; stroke: var(--fg-faint); stroke-width: 1.3; }
+.elabel { fill: var(--fg-dim); font-family: var(--font); font-size: 10.5px; }
+.elabel-bg { fill: var(--card); stroke: var(--line); stroke-width: 1; }
+.el-box.dragging .elabel-bg { stroke: var(--accent); }
+.lane-band { fill: none; stroke: var(--line-soft); }
+.lane-name { fill: var(--fg-dim); font-family: var(--ui); font-size: 11.5px; font-weight: 600; }
 
 /* ============================================================
-   Run tab
+   Run screen
    ============================================================ */
-.step-title { font-size: 13px; color: var(--fg); margin-bottom: 6px; }
-.step-meta { font-size: 11.5px; color: var(--fg-dim); margin-bottom: 4px; }
-.step-meta b { color: var(--fg); font-weight: 500; }
-
-.lib-row {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    flex-wrap: wrap;
-    padding: 8px 0;
-    border-bottom: 1px solid var(--line-soft);
-    font-size: 12.5px;
+.clock {
+    font-family: var(--font);
+    font-size: 30px;
+    font-weight: 600;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    color: var(--fg);
+    font-variant-numeric: tabular-nums;
 }
-.lib-row:last-child { border-bottom: none; }
-.lib-row .nm { flex: 1 1 220px; color: var(--fg); }
-.badge {
-    font-size: 10.5px;
-    padding: 2px 6px;
+.clock.live { color: var(--accent); }
+.clockrow { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 4px; }
+.clock-note { font-size: 12.5px; color: var(--fg-dim); }
+.chips { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 10px; }
+.chip {
+    padding: 3px 9px;
+    font-size: 12px;
     color: var(--fg-dim);
-    border: 1px solid var(--line);
-    border-radius: var(--radius-sm);
+    background: var(--sunken);
+    border-radius: 20px;
 }
-.badge.live { color: var(--ok); border-color: var(--ok); }
-.badge.shut { color: var(--fg-faint); }
+.chip b { font-family: var(--font); color: var(--fg); font-weight: 600; }
+.chip.warn b { color: var(--warn); }
+.chip.ok b { color: var(--ok); }
 
-.lane-group { margin-bottom: 18px; }
+.lane-group { margin-bottom: 22px; }
 .lane-group:last-child { margin-bottom: 0; }
 .lane-head {
     display: flex;
     align-items: center;
     gap: 10px;
     margin-bottom: 10px;
-    padding: 7px 11px;
-    font-size: 11px;
-    letter-spacing: 0.09em;
-    text-transform: uppercase;
+    padding-bottom: 7px;
+    font-size: 12.5px;
+    font-weight: 600;
     color: var(--fg);
-    background: var(--sunken);
-    border: 1px solid var(--line);
-    border-left: 3px solid var(--accent);
-    border-radius: var(--radius-sm);
+    border-bottom: 1px solid var(--line);
 }
-.lane-head .k { color: var(--fg-faint); }
-.lane-group .step { margin-left: 14px; }
+.lane-head .k { font-weight: 400; color: var(--fg-faint); }
 
-.tl {
+#runNowPanel .step { padding: 16px 17px; }
+#runNowPanel .step-title { font-size: 16px; }
+
+.lib-row {
     display: flex;
-    gap: 10px;
-    align-items: flex-start;
-    padding: 6px 0;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 9px 0;
     border-bottom: 1px solid var(--line-soft);
-    font-size: 12px;
+    font-size: 13px;
 }
-.tl:last-child { border-bottom: none; }
-.tl-t { flex: 0 0 auto; color: var(--fg-faint); }
-.tl-ref { flex: 0 0 auto; min-width: 26px; color: var(--accent); }
+.lib-row:last-child { border-bottom: none; }
+.lib-row .nm { flex: 1 1 200px; }
+.badge {
+    padding: 2px 8px;
+    font-size: 11.5px;
+    color: var(--fg-dim);
+    background: var(--sunken);
+    border-radius: 20px;
+}
+.badge.live { color: var(--ok); }
+.badge.shut { color: var(--fg-faint); }
+
+.tl { display: flex; gap: 10px; align-items: flex-start; padding: 7px 0; font-size: 12.5px; }
+.tl + .tl { border-top: 1px solid var(--line-soft); }
+.tl-t { flex: 0 0 auto; font-family: var(--font); font-size: 11.5px; color: var(--fg-faint); padding-top: 1px; }
+.tl-ref { flex: 0 0 auto; min-width: 24px; font-family: var(--font); font-size: 11.5px; color: var(--fg-dim); padding-top: 1px; }
 .tl-body { flex: 1; min-width: 0; }
 .tl-txt { color: var(--fg); }
-.tl-note { color: var(--fg-dim); white-space: pre-wrap; }
-.tl.k-note .tl-ref, .tl.k-start .tl-ref, .tl.k-finish .tl-ref { color: var(--fg-dim); }
-.tl.k-offscript .tl-ref { color: var(--warn); }
-.tl.k-skip .tl-txt, .tl.k-left .tl-txt { color: var(--warn); }
+.tl-note { margin-top: 2px; color: var(--fg-dim); white-space: pre-wrap; }
+.tl-edited { margin-top: 2px; font-size: 11px; color: var(--fg-faint); }
+.tl-editing {
+    flex-direction: column;
+    gap: 7px;
+    padding: 11px;
+    background: var(--sunken);
+    border-radius: var(--radius-sm);
+    border-top: 0;
+}
+.tl + .tl-editing, .tl-editing + .tl { border-top: 0; }
+.tl-time { width: 100px; font-family: var(--font); }
+.tl.k-offscript .tl-txt, .tl.k-skip .tl-txt, .tl.k-left .tl-txt { color: var(--warn); }
+.tl.k-choice .tl-txt { font-weight: 600; }
+#runTlPanel { max-height: calc(100vh - 460px); min-height: 220px; overflow: auto; }
 
 /* ---------- Preview overlay ---------- */
 .overlay {
@@ -434,39 +518,38 @@ label.f {
     inset: 0;
     z-index: 400;
     display: none;
-    padding: 22px;
-    background: rgba(0, 0, 0, 0.72);
+    padding: 26px 20px;
+    background: rgba(10, 11, 14, 0.7);
     overflow: auto;
 }
 .overlay.show { display: block; }
 .overlay-inner {
     max-width: 1600px;
     margin: 0 auto;
-    padding: 16px;
+    padding: 18px;
     background: var(--card);
     border: 1px solid var(--line);
     border-radius: var(--radius);
+    box-shadow: var(--shadow-lift);
 }
 .overlay-inner svg { width: 100%; height: auto; }
 
-/* ============================================================
-   Notification
-   ============================================================ */
+/* ---------- Notification ---------- */
 .notification {
     position: fixed;
-    bottom: 24px;
+    bottom: 22px;
     left: 50%;
-    transform: translate(-50%, 20px);
+    transform: translate(-50%, 12px);
     z-index: 500;
-    padding: 10px 18px;
-    font-size: 12.5px;
+    padding: 9px 16px;
+    font-size: 13px;
     color: var(--accent-ink);
     background: var(--accent);
     border-radius: var(--radius-sm);
-    box-shadow: var(--shadow);
+    box-shadow: var(--shadow-lift);
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.22s, transform 0.22s;
+    transition: opacity 0.18s, transform 0.18s;
 }
 .notification.show { opacity: 1; transform: translate(-50%, 0); }
 .notification.error { color: #fff; background: var(--bad); }
@@ -474,13 +557,26 @@ label.f {
 /* ============================================================
    Responsive
    ============================================================ */
-@media (max-width: 640px) {
-    body { padding: 14px 10px 32px; }
-    .body { padding: 16px; }
-    .titlebar-title { display: none; }
-    .grid { grid-template-columns: 1fr; }
+@media (max-width: 1200px) {
+    #btnSplit { display: none; }
+    .split .buildwrap { display: block; }
+    .split .buildside { position: static; }
+    .split .buildside .panel { border-top: 1px solid var(--line-soft); padding-top: 20px; }
 }
-
+@media (max-width: 1080px) {
+    .runwrap { grid-template-columns: minmax(0, 1fr); gap: 20px; }
+    .runrail { position: static; }
+    .canvas-wrap { height: 68vh; }
+    #runTlPanel { max-height: none; }
+}
+@media (max-width: 640px) {
+    .topbar-in { padding: 10px 14px 0; }
+    .tabs { padding: 4px 10px 0; }
+    .body { padding: 16px 14px 48px; }
+    .subtitle { display: none; }
+    .grid { grid-template-columns: 1fr; }
+    .clock { font-size: 25px; }
+}
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
         animation-duration: 0.001ms !important;
@@ -490,7 +586,7 @@ label.f {
 }
 
 /* ============================================================
-   Print: one light palette for both themes
+   Print: one light palette, one tab at a time
    ============================================================ */
 @media print {
     :root, html[data-theme="dark"], html[data-theme="light"] {
@@ -498,31 +594,51 @@ label.f {
         --bg: #ffffff; --card: #ffffff; --sunken: #fafafa; --raised: #ffffff;
         --line: #999999; --line-soft: #cccccc;
         --fg: #111111; --fg-dim: #555555; --fg-faint: #777777;
-        --accent: #0b4f8a; --accent-soft: transparent; --accent-ink: #ffffff;
-        --shadow: none;
+        --accent: #333333; --accent-soft: transparent; --accent-ink: #ffffff;
+        --shadow: none; --shadow-lift: none;
     }
-    body { padding: 0; display: block; }
-    .container { max-width: none; border: none; box-shadow: none; }
-    .titlebar, .tabs, .drop, .notification, .btn, .overlay, .noprint { display: none !important; }
-    .body { padding: 0; }
+    body { background: #fff; }
+    .topbar, .tabs, .drop, .notification, .btn, .overlay, .noprint, .toolbar { display: none !important; }
+    .body { max-width: none; padding: 0; }
     section[hidden] { display: block !important; }
-    .panel { break-inside: avoid; page-break-inside: avoid; }
-    .step { break-inside: avoid; page-break-inside: avoid; }
-    .canvas-wrap { max-height: none; overflow: visible; border: none; }
+    .runwrap, .split .buildwrap { display: block; }
+    .runrail, .split .buildside { position: static; }
+    .canvas-wrap { height: auto; min-height: 0; overflow: visible; border: none; }
     .canvas-wrap svg { width: 100%; height: auto; }
-    html[data-print="build"] #pane-runbook { page-break-before: always; }
-    html[data-print="build"] #pane-run,
-    html[data-print="build"] #pane-about,
+    #runTlPanel { max-height: none; overflow: visible; }
+    #runHeadPanel, #runFlowPanel, #runTlPanel { border: none; padding: 0; }
+    .panel, .step, .tl, .lane-group { break-inside: avoid; page-break-inside: avoid; }
+    .field { border-color: #bbb; }
+    html[data-print="build"]   #pane-timeline,
+    html[data-print="flow"]    #pane-timeline,
+    html[data-print="runbook"] #pane-timeline,
+    html[data-print="run"]     #pane-timeline,
+    html[data-print="about"]   #pane-timeline,
+    html[data-print="timeline"] #pane-build,
+    html[data-print="timeline"] #pane-flow,
+    html[data-print="timeline"] #pane-runbook,
+    html[data-print="timeline"] #pane-run,
+    html[data-print="timeline"] #pane-about,
+    html[data-print="build"]   #pane-flow,
+    html[data-print="build"]   #pane-run,
+    html[data-print="build"]   #pane-about,
+    html[data-print="flow"]    #pane-build,
+    html[data-print="flow"]    #pane-runbook,
+    html[data-print="flow"]    #pane-run,
+    html[data-print="flow"]    #pane-about,
     html[data-print="runbook"] #pane-build,
+    html[data-print="runbook"] #pane-flow,
     html[data-print="runbook"] #pane-run,
     html[data-print="runbook"] #pane-about,
-    html[data-print="run"] #pane-build,
-    html[data-print="run"] #pane-runbook,
-    html[data-print="run"] #pane-about,
-    html[data-print="about"] #pane-build,
-    html[data-print="about"] #pane-runbook,
-    html[data-print="about"] #pane-run { display: none !important; }
-    .field { border-color: #bbb; }
+    html[data-print="run"]     #pane-build,
+    html[data-print="run"]     #pane-flow,
+    html[data-print="run"]     #pane-runbook,
+    html[data-print="run"]     #pane-about,
+    html[data-print="about"]   #pane-build,
+    html[data-print="about"]   #pane-flow,
+    html[data-print="about"]   #pane-runbook,
+    html[data-print="about"]   #pane-run { display: none !important; }
+    html[data-print="build"] #pane-runbook { page-break-before: always; }
 }
 </style>
 </head>
@@ -530,51 +646,56 @@ label.f {
 
 <div class="container">
 
-    <div class="titlebar">
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="dot"></div>
-        <div class="titlebar-title">flow-state</div>
-        <div class="spacer"></div>
-        <button class="icon-btn" id="themeBtn" type="button" aria-pressed="false" title="Switch theme">
-            <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true">
-                <circle cx="12" cy="12" r="4.2"></circle>
-                <path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path>
-            </svg>
-            <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M20 14.2A8.2 8.2 0 0 1 9.8 4a8.2 8.2 0 1 0 10.2 10.2z"></path>
-            </svg>
-        </button>
-    </div>
-
-    <div class="tabs" role="tablist">
-        <button class="tab" id="tab-build" role="tab" aria-selected="true" aria-controls="pane-build">build</button>
-        <button class="tab" id="tab-runbook" role="tab" aria-selected="false" aria-controls="pane-runbook">runbook</button>
-        <button class="tab" id="tab-run" role="tab" aria-selected="false" aria-controls="pane-run">run</button>
-        <button class="tab" id="tab-about" role="tab" aria-selected="false" aria-controls="pane-about">about</button>
-    </div>
+    <header class="topbar">
+        <div class="topbar-in">
+            <div class="mark">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <rect x="2.5" y="3" width="9" height="6" rx="2"></rect>
+                    <rect x="12.5" y="15" width="9" height="6" rx="2"></rect>
+                    <path d="M7 9v4.5a1.5 1.5 0 0 0 1.5 1.5H17"></path>
+                </svg>
+                flow-state
+            </div>
+            <div class="rule" aria-hidden="true"></div>
+            <div class="subtitle" id="promptState">Untitled process</div>
+            <button class="icon-btn" id="themeBtn" type="button" aria-pressed="false" title="Switch theme">
+                <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true">
+                    <circle cx="12" cy="12" r="4.2"></circle>
+                    <path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path>
+                </svg>
+                <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M20 14.2A8.2 8.2 0 0 1 9.8 4a8.2 8.2 0 1 0 10.2 10.2z"></path>
+                </svg>
+            </button>
+        </div>
+        <nav class="tabs" role="tablist">
+            <button class="tab" id="tab-build" role="tab" aria-selected="true" aria-controls="pane-build">Build</button>
+            <button class="tab" id="tab-flow" role="tab" aria-selected="false" aria-controls="pane-flow">Flowchart</button>
+            <button class="tab" id="tab-runbook" role="tab" aria-selected="false" aria-controls="pane-runbook">Runbook</button>
+            <button class="tab" id="tab-run" role="tab" aria-selected="false" aria-controls="pane-run">Run</button>
+            <button class="tab" id="tab-timeline" role="tab" aria-selected="false" aria-controls="pane-timeline">Timeline</button>
+            <button class="tab" id="tab-about" role="tab" aria-selected="false" aria-controls="pane-about">About</button>
+        </nav>
+    </header>
 
     <div class="body">
-
-        <div class="prompt"><span class="path">~/flow-state</span> <span class="chev">&gt;</span> <span id="promptState">ready</span></div>
-        <div class="comment"># build a process as a flowchart, get a runbook out of it, runs in your browser, nothing is uploaded</div>
 
         <!-- ============================ BUILD ============================ -->
         <section id="pane-build" role="tabpanel" aria-labelledby="tab-build">
 
-            <div class="panel noprint">
-                <div class="row">
-                    <button class="btn" id="btnLoad">Load config</button>
-                    <button class="btn btn-primary" id="btnSave">Save config</button>
-                    <button class="btn" id="btnSvg">Export SVG</button>
-                    <button class="btn" id="btnPng">Export PNG</button>
-                    <button class="btn" id="btnPrint">Print</button>
-                    <div class="spacer"></div>
-                    <button class="btn btn-danger" id="btnReset">Reset</button>
-                </div>
+            <div class="toolbar noprint">
+                <button class="btn btn-primary" id="btnSave">Save config</button>
+                <button class="btn" id="btnLoad">Load config</button>
+                <button class="btn" id="btnPrint">Print</button>
+                <div class="spacer"></div>
+                <button class="btn btn-ghost btn-danger" id="btnReset">Reset</button>
+                <button class="btn btn-ghost" id="btnSplit" type="button" aria-pressed="false">Split view</button>
                 <input type="file" id="fileIn" accept=".json,application/json" hidden>
-                <div class="note" style="margin-top:10px">Ctrl+S saves, Ctrl+O loads. Work is kept in this browser until you reset.</div>
             </div>
+
+            <div class="buildwrap">
+            <div class="buildmain">
+
 
             <div class="panel">
                 <div class="section-header"><span>Process</span></div>
@@ -609,27 +730,39 @@ label.f {
 
             <div class="panel">
                 <div class="section-header">
-                    <span>Flowchart</span>
-                    <div class="row noprint">
-                        <button class="btn btn-sm" id="btnZoomOut">-</button>
-                        <span class="log" id="zoomLabel">100%</span>
-                        <button class="btn btn-sm" id="btnZoomIn">+</button>
-                        <button class="btn btn-sm" id="btnFit">Fit</button>
-                        <button class="btn btn-sm" id="btnBig">Full preview</button>
-                        <button class="btn btn-sm" id="btnNudgeReset">Reset layout</button>
-                    </div>
-                </div>
-                <div class="canvas-wrap" id="canvasWrap"></div>
-                <div class="note noprint" style="margin-top:10px">Drag a box or a branch label to move it. Scroll inside the frame to pan, or open Full preview to see the whole thing.</div>
-            </div>
-
-            <div class="panel">
-                <div class="section-header">
                     <span>Steps</span>
                     <button class="btn btn-sm noprint" id="btnAddLoose">Add step</button>
                 </div>
                 <div id="steps"></div>
                 <div class="log" style="margin-top:10px" id="stat"></div>
+            </div>
+            </div>
+            <div class="buildside" id="splitHost"></div>
+            </div>
+
+        </section>
+
+        <!-- ============================ FLOWCHART ============================ -->
+        <section id="pane-flow" role="tabpanel" aria-labelledby="tab-flow" hidden>
+
+            <div class="toolbar noprint">
+                <button class="btn btn-sm" id="btnZoomOut" title="Zoom out">&minus;</button>
+                <span class="log" id="zoomLabel" style="min-width:44px;text-align:center">100%</span>
+                <button class="btn btn-sm" id="btnZoomIn" title="Zoom in">+</button>
+                <button class="btn btn-sm" id="btnFit">Fit</button>
+                <button class="btn btn-sm" id="btnBig">Full preview</button>
+                <button class="btn btn-sm" id="btnNudgeReset">Reset layout</button>
+                <div class="spacer"></div>
+                <button class="btn btn-sm" id="btnSvg">Export SVG</button>
+                <button class="btn btn-sm" id="btnPng">Export PNG</button>
+                <button class="btn btn-sm" id="btnFlowPrint">Print</button>
+            </div>
+
+            <div id="flowHost">
+            <div class="panel" id="chartPanel">
+                <div class="canvas-wrap" id="canvasWrap"></div>
+                <div class="note noprint" style="margin-top:10px">Drag a box or a branch label to move it. Scroll inside the frame to pan, or open Full preview to see the whole thing.</div>
+            </div>
             </div>
 
         </section>
@@ -667,6 +800,7 @@ label.f {
         <!-- ============================ RUN ============================ -->
         <section id="pane-run" role="tabpanel" aria-labelledby="tab-run" hidden>
 
+            <div id="runLists">
             <div class="panel noprint">
                 <div class="section-header"><span>Processes</span></div>
                 <div class="note" style="margin-bottom:12px">
@@ -688,37 +822,36 @@ label.f {
                 <div class="section-header"><span>Runs</span></div>
                 <div id="runsList"></div>
             </div>
+            </div>
 
             <div class="panel" id="runHeadPanel" hidden>
                 <div class="section-header">
-                    <span>Run record</span>
+                    <span id="runTitle"></span>
                     <div class="row noprint">
+                        <button class="btn btn-sm btn-ghost" id="btnRunLists">Switch process</button>
                         <button class="btn btn-sm" id="btnRunMd">Export Markdown</button>
                         <button class="btn btn-sm" id="btnRunJson">Export JSON</button>
                         <button class="btn btn-sm" id="btnRunPrint">Print</button>
                         <button class="btn btn-sm btn-primary" id="btnRunFinish">Finish run</button>
-                        <button class="btn btn-sm" id="btnRunClose">Close</button>
                     </div>
                 </div>
-                <div class="step-title" id="runTitle"></div>
-                <div class="grid" style="margin-bottom:12px">
+                <div class="clockrow">
+                    <div class="clock" id="runClock">0m</div>
+                    <div class="clock-note" id="runClockNote"></div>
+                </div>
+                <div class="chips" id="runMeta"></div>
+                <div class="grid" style="margin-top:14px">
                     <label class="f">Operator<input type="text" class="field" id="rOperator" placeholder="Who is running this"></label>
                     <label class="f">Incident ref<input type="text" class="field" id="rRef" placeholder="Ticket or case number"></label>
                 </div>
-                <div class="log" id="runMeta"></div>
             </div>
+
+            <div class="runwrap">
+            <div class="runmain">
 
             <div class="panel" id="runNowPanel" hidden>
                 <div class="section-header"><span>Now</span></div>
                 <div id="runNow"></div>
-            </div>
-
-            <div class="panel noprint" id="runFlowPanel" hidden>
-                <div class="section-header">
-                    <span>Position</span>
-                    <button class="btn btn-sm" id="btnRunBig">Full preview</button>
-                </div>
-                <div class="canvas-wrap" id="runFlowWrap" style="max-height:400px"></div>
             </div>
 
             <div class="panel noprint" id="runOffPanel" hidden>
@@ -731,9 +864,100 @@ label.f {
                 </div>
             </div>
 
+            </div>
+            <div class="runrail">
+
             <div class="panel" id="runTlPanel" hidden>
                 <div class="section-header"><span>Timeline</span></div>
                 <div id="runTimeline"></div>
+            </div>
+
+            <div class="panel noprint" id="runFlowPanel" hidden>
+                <div class="section-header">
+                    <span>Position</span>
+                    <button class="btn btn-sm" id="btnRunBig">Full preview</button>
+                </div>
+                <div class="canvas-wrap" id="runFlowWrap" style="height:300px;min-height:0"></div>
+            </div>
+
+            </div>
+            </div>
+
+        </section>
+
+        <!-- ============================ TIMELINE ============================ -->
+        <section id="pane-timeline" role="tabpanel" aria-labelledby="tab-timeline" hidden>
+
+            <div id="tlLists">
+            <div class="panel noprint">
+                <div class="section-header"><span>Incident timelines</span></div>
+                <div class="note" style="margin-bottom:12px">
+                    For the incidents that do not follow a process. Log what happened, when, and where you
+                    saw it. No template, no steps to close, just the record.
+                </div>
+                <div class="row" style="margin-bottom:14px">
+                    <input type="text" class="field" id="tlNewName" placeholder="Incident name" style="flex:1 1 240px;width:auto">
+                    <button class="btn btn-primary" id="btnTlNew">Start timeline</button>
+                </div>
+                <div id="tlList"></div>
+            </div>
+            </div>
+
+            <div class="panel" id="tlHeadPanel" hidden>
+                <div class="section-header">
+                    <span id="tlTitleText"></span>
+                    <div class="row noprint">
+                        <button class="btn btn-sm btn-ghost" id="btnTlLists">All timelines</button>
+                        <button class="btn btn-sm" id="btnTlMd">Export Markdown</button>
+                        <button class="btn btn-sm" id="btnTlJson">Export JSON</button>
+                        <button class="btn btn-sm" id="btnTlPrint">Print</button>
+                    </div>
+                </div>
+                <div class="clockrow">
+                    <div class="clock" id="tlSpan">0m</div>
+                    <div class="clock-note" id="tlSpanNote"></div>
+                </div>
+                <div class="chips" id="tlChips"></div>
+                <div class="grid" style="margin-top:14px">
+                    <label class="f">Incident name<input type="text" class="field" id="tlTitle" placeholder="Name this incident"></label>
+                    <label class="f">Incident ref<input type="text" class="field" id="tlRef" placeholder="Ticket or case number"></label>
+                    <label class="f">Analyst<input type="text" class="field" id="tlWho" placeholder="Who is keeping this"></label>
+                </div>
+            </div>
+
+            <div class="runwrap" id="tlWork" hidden>
+            <div class="runmain">
+                <div class="panel">
+                    <div class="section-header"><span>Events</span></div>
+                    <div id="tlEvents"></div>
+                </div>
+            </div>
+            <div class="runrail">
+                <div class="panel noprint" id="tlAddPanel">
+                    <div class="section-header"><span>Add an event</span></div>
+                    <label class="f">When
+                        <div class="row" style="flex-wrap:nowrap">
+                            <input type="datetime-local" class="field" id="evWhen">
+                            <button class="btn btn-sm" id="btnEvNow" type="button" title="Set to now">Now</button>
+                        </div>
+                    </label>
+                    <label class="f" style="margin-top:10px">Source
+                        <input type="text" class="field" id="evSource" placeholder="Where you saw it: sign-in logs, EDR, the user" list="evSources">
+                        <datalist id="evSources"></datalist>
+                    </label>
+                    <label class="f" style="margin-top:10px">What happened
+                        <input type="text" class="field" id="evText" placeholder="One line, plain language">
+                    </label>
+                    <label class="f" style="margin-top:10px">Detail
+                        <textarea class="field" id="evNote" rows="3" placeholder="IDs, hostnames, queries, who said what"></textarea>
+                    </label>
+                    <div class="row" style="margin-top:12px">
+                        <button class="btn btn-primary" id="btnEvAdd">Add event</button>
+                        <div class="spacer"></div>
+                        <button class="btn btn-ghost btn-danger" id="btnTlDelete">Delete timeline</button>
+                    </div>
+                </div>
+            </div>
             </div>
 
         </section>
@@ -741,26 +965,31 @@ label.f {
         <!-- ============================ ABOUT ============================ -->
         <section id="pane-about" role="tabpanel" aria-labelledby="tab-about" hidden>
             <div class="panel">
-                <div class="section-header"><span>About</span></div>
+                <div class="section-header"><span>What this is</span></div>
                 <div class="note">
-                    flow-state turns a process into two views of the same thing: a flowchart you can print or
-                    hand over, and a runbook with the detail each step needs. Build it on the build tab, fill in
-                    the detail on the runbook tab, and save the config to carry both.
+                    flow-state turns a process into three views of the same thing: a list of steps you edit,
+                    a flowchart you can print or hand over, and a runbook with the detail each step needs.
+                    Build the steps on the Build tab, read the chart on the Flowchart tab, fill in the detail
+                    on the Runbook tab, and save the config to carry all of it.
                     <br><br>
                     Everything runs client side. There is no network call and no analytics. The config file is
                     plain JSON, so it diffs and reviews like any other artefact.
                     <br><br>
-                    The run tab is the other half. Import a config, start a run, and the tool walks the flow
+                    The Run tab is the other half. Import a config, start a run, and the tool walks the flow
                     with you: it shows only the steps that are live right now, you pick the outcome at each
                     decision, and every choice, note and skip is timestamped into a record you can export or
                     print. Off-script actions get logged too rather than being lost.
-                    Imported processes and runs are kept in this browser separately from the flow you are
-                    building, so resetting the builder does not touch them.
+                    Imported processes, run records and incident timelines are kept in this browser
+                    separately from the flow you are building, so resetting the builder does not touch them.
+                    <br><br>
+                    The Timeline tab is for the incidents that do not follow a process at all: log events
+                    with a time and a source, in whatever order you learn them, and it keeps them in
+                    sequence and exports the same way everything else does.
                 </div>
             </div>
         </section>
 
-        <div class="note">flow-state v1.0.0 &middot; MIT &middot; <code>github.com/shanemc92</code></div>
+        <div class="note" style="margin-top:28px;padding-top:16px;border-top:1px solid var(--line-soft);font-size:12px">flow-state v1.2.0 &nbsp;&middot;&nbsp; MIT &nbsp;&middot;&nbsp; <code>github.com/shanemc92</code></div>
     </div>
 </div>
 
@@ -781,7 +1010,7 @@ label.f {
 "use strict";
 
 /* ---------- app identity ---------- */
-const APP = { id: "flow-state", version: "1.0.0", schema: 1 };
+const APP = { id: "flow-state", version: "1.2.0", schema: 1 };
 
 /* ---------- dom helpers ---------- */
 const $  = s => document.querySelector(s);
@@ -836,16 +1065,41 @@ themeBtn.addEventListener("click", () => {
 applyTheme(store.get("theme") || "dark");
 
 /* ---------- tabs ---------- */
-const TABS = [["build", "pane-build"], ["runbook", "pane-runbook"], ["run", "pane-run"], ["about", "pane-about"]];
+const TABS = [["build", "pane-build"], ["flow", "pane-flow"], ["runbook", "pane-runbook"],
+              ["run", "pane-run"], ["timeline", "pane-timeline"], ["about", "pane-about"]];
+let currentTab = "build";
+let split = store.get("split") === "1";
+
+/* The chart lives in one place at a time: beside the steps in split view,
+   otherwise on its own tab. */
+function placeChart(which) {
+    const host = (split && which === "build") ? $("#splitHost") : $("#flowHost");
+    const panel = $("#chartPanel");
+    if (panel && panel.parentNode !== host) host.appendChild(panel);
+}
+function setSplit(on) {
+    split = !!on;
+    store.set("split", split ? "1" : "0");
+    $("#pane-build").classList.toggle("split", split);
+    const b = $("#btnSplit");
+    b.setAttribute("aria-pressed", String(split));
+    b.textContent = split ? "Single column" : "Split view";
+    placeChart(currentTab);
+    if (split || currentTab === "flow") drawCanvas();
+}
 function tab(which) {
     TABS.forEach(([id, pane]) => {
         $("#tab-" + id).setAttribute("aria-selected", String(id === which));
         $("#" + pane).hidden = id !== which;
     });
     document.documentElement.dataset.print = which;
+    currentTab = which;
+    placeChart(which);
     if (which === "runbook") drawRunbook();
     if (which === "run") drawRunTab();
-    if (which === "build") { drawSteps(); drawCanvas(); }
+    if (which === "timeline") drawTlTab();
+    if (which === "build") drawSteps();
+    if (which === "flow" || (which === "build" && split)) drawCanvas();
 }
 TABS.forEach(([id]) => $("#tab-" + id).addEventListener("click", () => tab(id)));
 
@@ -1001,8 +1255,8 @@ function measure(n) {
     const inner = Math.floor((w - pad) / CHW);
     const lines = wrap(n.label, inner);
     const h = diamond
-        ? Math.max(108, lines.length * 17 + 78)
-        : Math.max(62, lines.length * 17 + 44);
+        ? Math.max(102, lines.length * 17 + 68)
+        : Math.max(56, lines.length * 17 + 34);
     return { w, h, lines, diamond };
 }
 
@@ -1143,7 +1397,7 @@ function buildSvg(standalone, src, mark) {
             const t = sv("text", "lane-name");
             t.setAttribute("x", L.laneX[l.id]);
             t.setAttribute("y", L.top + 18);
-            t.textContent = (l.name || "lane").toUpperCase();
+            t.textContent = l.name || "lane";
             svg.appendChild(t);
         });
     }
@@ -1244,15 +1498,7 @@ function buildSvg(standalone, src, mark) {
             g.appendChild(r);
         }
 
-        const kindY = b.y + (b.diamond ? 30 : 18);
-        const refY = b.y + b.h - (b.diamond ? 24 : 10);
-        const kind = sv("text", "nd-kind");
-        kind.setAttribute("x", b.x + b.w / 2);
-        kind.setAttribute("y", kindY);
-        kind.setAttribute("text-anchor", "middle");
-        kind.textContent = n.type.toUpperCase();
-        g.appendChild(kind);
-
+        const refY = b.y + b.h - (b.diamond ? 20 : 9);
         const rf = sv("text", "nd-ref");
         rf.setAttribute("x", b.x + b.w / 2);
         rf.setAttribute("y", refY);
@@ -1260,7 +1506,8 @@ function buildSvg(standalone, src, mark) {
         rf.textContent = "#" + R[n.id];
         g.appendChild(rf);
 
-        const startY = (kindY + 12 + refY - 12) / 2 - ((b.lines.length - 1) * 17) / 2 + 3;
+        const top = b.y + (b.diamond ? 26 : 12);
+        const startY = (top + refY - 11) / 2 - ((b.lines.length - 1) * 17) / 2 + 3;
         b.lines.forEach((ln, i) => {
             const t = sv("text");
             t.setAttribute("x", b.x + b.w / 2);
@@ -1287,19 +1534,18 @@ function buildSvg(standalone, src, mark) {
 function exportCss() {
     return [
         ".nd-box rect,.nd-box polygon{stroke-width:1.4}",
-        ".nd-action rect{fill:#fff;stroke:#555}",
-        ".nd-start rect,.nd-end rect{fill:#eef4fb;stroke:#0b4f8a}",
+        ".nd-action rect{fill:#fff;stroke:#666}",
+        ".nd-start rect,.nd-end rect{fill:#eeeefb;stroke:#4b49bd}",
         ".nd-decision polygon{fill:#fff;stroke:#b45309}",
         ".nd-parallel polygon{fill:#fff;stroke:#0f766e}",
         ".nd-box text{fill:#111;font-family:monospace;font-size:12px}",
-        ".nd-box .nd-kind{fill:#888;font-size:9.5px;letter-spacing:.08em}",
-        ".nd-box .nd-ref{fill:#666;font-size:9.5px}",
+        ".nd-box .nd-ref{fill:#888;font-size:10px}",
         ".edge{fill:none;stroke:#666;stroke-width:1.4}",
         ".arrowhead{fill:#666;stroke:none}",
         ".elabel{fill:#444;font-family:monospace;font-size:10.5px}",
         ".elabel-bg{fill:#fff;stroke:#ddd;stroke-width:1}",
         ".lane-band{fill:none;stroke:#bbb;stroke-dasharray:4 4}",
-        ".lane-name{fill:#666;font-family:monospace;font-size:10.5px;letter-spacing:.08em}",
+        ".lane-name{fill:#555;font-family:sans-serif;font-size:11.5px;font-weight:600}",
         "svg{background:#fff}"
     ].join("");
 }
@@ -1558,7 +1804,7 @@ function drawStat() {
     put("a", String(state.lanes.length)); put(null, " lanes, ");
     put(ends ? "ok" : "warn", String(ends)); put(null, " end points, ");
     put(dangling ? "bad" : "ok", String(dangling)); put(null, " unlinked branches");
-    $("#promptState").textContent = state.meta.title || "untitled process";
+    $("#promptState").textContent = state.meta.title || "Untitled process";
 }
 
 /* ============================================================
@@ -1853,6 +2099,8 @@ $("#fileIn").addEventListener("change", e => {
 $("#btnSvg").addEventListener("click", exportSvg);
 $("#btnPng").addEventListener("click", exportPng);
 $("#btnPrint").addEventListener("click", () => window.print());
+$("#btnFlowPrint").addEventListener("click", () => window.print());
+$("#btnSplit").addEventListener("click", () => setSplit(!split));
 $("#btnReset").addEventListener("click", reset);
 
 $("#btnStarter").addEventListener("click", () => {
@@ -1923,7 +2171,7 @@ document.addEventListener("keydown", e => {
 /* ============================================================
    Run tab: library, runs, and the guided walk-through
    ============================================================ */
-let lib = [], runs = [], active = null;
+let lib = [], runs = [], active = null, listsOpen = false, tlEdit = null;
 const drafts = {};
 
 function loadRunData() {
@@ -2017,11 +2265,12 @@ function startRun(entry) {
     logEntry(run, { kind: "start", text: "Run started: " + entry.title });
     runs.unshift(run);
     active = run;
+    listsOpen = false;
     saveRuns();
     drawRunTab();
     notify("Run started");
 }
-function openRun(run) { active = run; saveRuns(); drawRunTab(); }
+function openRun(run) { active = run; listsOpen = false; tlEdit = null; saveRuns(); drawRunTab(); }
 
 function reopenTo(ids) {
     ids.forEach(id => {
@@ -2151,11 +2400,18 @@ function drawRunTab() {
     drawLib();
     drawRunsList();
     const on = !!active;
+    $("#runLists").hidden = on && !listsOpen;
+    $("#btnRunLists").textContent = listsOpen ? "Hide processes" : "Switch process";
     ["#runHeadPanel", "#runNowPanel", "#runTlPanel"].forEach(id => $(id).hidden = !on);
     ["#runFlowPanel", "#runOffPanel"].forEach(id => $(id).hidden = !on || !!active.finished);
     if (!on) return;
 
     $("#runTitle").textContent = active.title;
+    const fin = $("#btnRunFinish");
+    fin.textContent = active.finished ? "Close record" : "Finish run";
+    fin.onclick = active.finished
+        ? () => { active = null; listsOpen = true; saveRuns(); drawRunTab(); }
+        : finishRun;
     $("#rOperator").value = active.operator || "";
     $("#rRef").value = active.ref || "";
     $("#rOperator").disabled = !!active.finished;
@@ -2168,22 +2424,30 @@ function drawRunTab() {
 
 function updateRunMeta() {
     if (!active) return;
+    const live = !active.finished;
+    const clock = $("#runClock");
+    clock.textContent = elapsed(active.started, active.finished);
+    clock.classList.toggle("live", live);
+    $("#runClockNote").textContent = live
+        ? "since " + stamp(active.started)
+        : "total, closed " + stamp(active.finished);
+
     const m = $("#runMeta");
     m.textContent = "";
-    const put = (cls, txt) => m.appendChild(el("span", cls, txt));
-    put(null, "started " + stamp(active.started) + ", ");
-    if (active.finished) {
-        put(null, "finished " + stamp(active.finished) + ", ");
-        put("ok", elapsed(active.started, active.finished));
-        put(null, " elapsed, ");
-    } else {
-        put("warn", elapsed(active.started) + " elapsed");
-        put(null, ", ");
+    const chip = (cls, label, value) => {
+        const c = el("span", "chip" + (cls ? " " + cls : ""));
+        c.appendChild(el("b", null, value));
+        c.appendChild(document.createTextNode(" " + label));
+        m.appendChild(c);
+    };
+    chip(null, "of " + active.config.nodes.length + " steps closed", String(active.done.length));
+    chip(active.open.length ? "warn" : "ok", live ? "open now" : "left open", String(active.open.length));
+    chip(null, active.entries.length === 1 ? "entry logged" : "entries logged", String(active.entries.length));
+    if (active.ref) {
+        const c = el("span", "chip");
+        c.appendChild(el("b", null, active.ref));
+        m.appendChild(c);
     }
-    put("a", String(active.done.length));
-    put(null, " of " + active.config.nodes.length + " steps closed, ");
-    put(active.open.length ? "warn" : "ok", String(active.open.length));
-    put(null, " open");
 }
 
 function drawRunNow() {
@@ -2227,6 +2491,26 @@ function drawRunNow() {
             ev.appendChild(el("b", null, "Capture: "));
             ev.appendChild(document.createTextNode(n.evidence));
             card.appendChild(ev);
+        }
+
+        if (n.outs.length) {
+            const outs = el("div", "outs");
+            outs.appendChild(el("div", "note", n.type === "decision"
+                ? "Outcomes"
+                : (n.type === "parallel"
+                    ? (n.outs.length === 2 ? "Opens both branches" : "Opens all " + n.outs.length + " branches")
+                    : "Next")));
+            n.outs.forEach((o, i) => {
+                const row = el("div", "out-row");
+                if (o.label) row.appendChild(el("span", "badge", o.label));
+                row.appendChild(el("span", "arrow", "\u2192"));
+                const t = byId(o.to, cfg);
+                row.appendChild(el("div", "log", t
+                    ? "#" + R[t.id] + " " + (t.label || "(unnamed)") + (t.type === "end" ? " (closes the path)" : "")
+                    : "not linked"));
+                outs.appendChild(row);
+            });
+            card.appendChild(outs);
         }
 
         const ta = el("textarea", "field");
@@ -2307,34 +2591,103 @@ function drawRunFlow() {
     host.appendChild(built.svg);
 }
 
+function setClock(iso, hhmm) {
+    const m = /^(\d{1,2}):(\d{2})(?::(\d{2}))?$/.exec(String(hhmm).trim());
+    const d = new Date(iso);
+    if (!m || isNaN(d) || +m[1] > 23 || +m[2] > 59) return null;
+    d.setHours(+m[1], +m[2], +m[3] || 0, 0);
+    return d.toISOString();
+}
+
 function drawTimeline() {
     const host = $("#runTimeline");
     host.textContent = "";
     if (!active.entries.length) {
-        host.appendChild(el("div", "empty", "Nothing logged yet."));
+        host.appendChild(el("div", "empty", "Nothing logged yet. It fills up as you work through the steps."));
         return;
     }
+
     active.entries.forEach((e, i) => {
+        if (tlEdit === i) { host.appendChild(timelineEditor(e, i)); return; }
+
         const row = el("div", "tl k-" + (e.kind || "step"));
         row.appendChild(el("div", "tl-t", clock(e.t)));
         row.appendChild(el("div", "tl-ref", e.ref ? "#" + e.ref : "-"));
         const body = el("div", "tl-body");
         body.appendChild(el("div", "tl-txt", e.text || ""));
         if (e.note) body.appendChild(el("div", "tl-note", e.note));
+        if (e.edited) body.appendChild(el("div", "tl-edited", "edited " + clock(e.edited)));
         row.appendChild(body);
-        if (!active.finished && (e.kind === "note" || e.kind === "offscript")) {
-            const x = el("button", "btn btn-sm btn-danger noprint", "x");
-            x.title = "Remove this entry";
-            x.addEventListener("click", () => {
-                if (!confirm("Remove this entry from the record?")) return;
-                active.entries.splice(i, 1);
-                saveRuns();
-                drawTimeline();
-            });
-            row.appendChild(x);
-        }
+
+        const ed = el("button", "btn btn-sm btn-ghost noprint", "Edit");
+        ed.title = "Correct this entry";
+        ed.addEventListener("click", () => { tlEdit = i; drawTimeline(); });
+        row.appendChild(ed);
         host.appendChild(row);
     });
+}
+
+function timelineEditor(e, i) {
+    const box = el("div", "tl tl-editing");
+
+    const top = el("div", "row");
+    const time = el("input", "field tl-time");
+    time.type = "text";
+    time.value = clock(e.t);
+    time.placeholder = "hh:mm:ss";
+    top.appendChild(time);
+    top.appendChild(el("div", "log", e.ref ? "step #" + e.ref : (e.kind || "entry")));
+    box.appendChild(top);
+
+    const txt = el("input", "field");
+    txt.type = "text";
+    txt.value = e.text || "";
+    txt.placeholder = "What happened";
+    box.appendChild(txt);
+
+    const note = el("textarea", "field");
+    note.rows = 2;
+    note.value = e.note || "";
+    note.placeholder = "Note";
+    box.appendChild(note);
+
+    const acts = el("div", "row");
+    const save = el("button", "btn btn-sm btn-primary", "Save entry");
+    save.addEventListener("click", () => {
+        const iso = setClock(e.t, time.value);
+        if (!iso) { notify("Time needs to look like 14:05 or 14:05:30", true); return; }
+        const changed = iso !== e.t || txt.value !== (e.text || "") || note.value !== (e.note || "");
+        e.t = iso;
+        e.text = txt.value;
+        e.note = note.value;
+        if (changed) e.edited = new Date().toISOString();
+        active.entries.sort((a, b) => new Date(a.t) - new Date(b.t));
+        tlEdit = null;
+        saveRuns();
+        drawTimeline();
+        if (changed) notify("Entry updated");
+    });
+    acts.appendChild(save);
+
+    const cancel = el("button", "btn btn-sm", "Cancel");
+    cancel.addEventListener("click", () => { tlEdit = null; drawTimeline(); });
+    acts.appendChild(cancel);
+
+    acts.appendChild(el("div", "spacer"));
+
+    const del = el("button", "btn btn-sm btn-danger", "Delete");
+    del.addEventListener("click", () => {
+        if (!confirm("Delete this entry from the record?")) return;
+        active.entries.splice(i, 1);
+        tlEdit = null;
+        saveRuns();
+        drawTimeline();
+        updateRunMeta();
+    });
+    acts.appendChild(del);
+
+    box.appendChild(acts);
+    return box;
 }
 
 /* ---------- run exports ---------- */
@@ -2455,15 +2808,11 @@ function exportRunJson() {
         notify("Logged");
     });
 
-    $("#btnRunFinish").addEventListener("click", finishRun);
+    $("#btnRunLists").addEventListener("click", () => { listsOpen = !listsOpen; drawRunTab(); });
     $("#btnRunMd").addEventListener("click", exportRunMd);
     $("#btnRunJson").addEventListener("click", exportRunJson);
     $("#btnRunPrint").addEventListener("click", () => window.print());
-    $("#btnRunClose").addEventListener("click", () => {
-        active = null;
-        saveRuns();
-        drawRunTab();
-    });
+
     $("#btnRunBig").addEventListener("click", () => {
         if (!active) return;
         const built = buildSvg(false, active.config, { now: active.open, done: active.done });
@@ -2479,8 +2828,350 @@ function exportRunJson() {
     setInterval(() => { if (active && !active.finished) updateRunMeta(); }, 30000);
 })();
 
+/* ============================================================
+   Incident timeline: off-script record keeping
+   ============================================================ */
+let tls = [], tlNow = null, evEdit = null;
+
+function loadTls() {
+    try { tls = JSON.parse(store.get("timelines") || "[]"); } catch (e) { tls = []; }
+    if (!Array.isArray(tls)) tls = [];
+    tls.forEach(t => { t.events = Array.isArray(t.events) ? t.events : []; });
+    tlNow = tls.find(t => t.id === store.get("activeTimeline")) || null;
+}
+function saveTls() {
+    store.set("timelines", JSON.stringify(tls));
+    store.set("activeTimeline", tlNow ? tlNow.id : "");
+}
+
+const pad2 = n => String(n).padStart(2, "0");
+function toLocalInput(iso) {
+    const d = new Date(iso);
+    if (isNaN(d)) return "";
+    return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}T${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+}
+function fromLocalInput(v) {
+    const d = new Date(v);
+    return isNaN(d) ? null : d.toISOString();
+}
+function localStr(iso) {
+    const d = new Date(iso);
+    if (isNaN(d)) return "unknown";
+    return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())} ${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
+}
+function tzLabel() {
+    const o = -new Date().getTimezoneOffset();
+    const sign = o < 0 ? "-" : "+";
+    return `UTC${sign}${pad2(Math.floor(Math.abs(o) / 60))}:${pad2(Math.abs(o) % 60)}`;
+}
+const evSorted = t => t.events.slice().sort((a, b) => new Date(a.t) - new Date(b.t));
+
+/* ---------- timelines ---------- */
+function newTimeline(name) {
+    const t = {
+        id: uid(),
+        title: name || "Untitled incident",
+        ref: "",
+        who: store.get("operator") || "",
+        created: new Date().toISOString(),
+        events: []
+    };
+    tls.unshift(t);
+    tlNow = t;
+    evEdit = null;
+    saveTls();
+    drawTlTab();
+    notify("Timeline started");
+}
+function addEvent() {
+    if (!tlNow) return;
+    const iso = fromLocalInput($("#evWhen").value);
+    const text = $("#evText").value.trim();
+    if (!iso) { notify("Set a date and time for the event", true); return; }
+    if (!text) { notify("Say what happened in one line", true); return; }
+    tlNow.events.push({
+        id: uid(),
+        t: iso,
+        source: $("#evSource").value.trim(),
+        text,
+        note: $("#evNote").value.trim()
+    });
+    $("#evText").value = "";
+    $("#evNote").value = "";
+    $("#evWhen").value = toLocalInput(new Date().toISOString());
+    saveTls();
+    drawTlTab();
+    $("#evText").focus();
+}
+
+/* ---------- lists ---------- */
+function drawTlList() {
+    const host = $("#tlList");
+    host.textContent = "";
+    if (!tls.length) {
+        host.appendChild(el("div", "empty", "No timelines yet. Name an incident above to start one."));
+        return;
+    }
+    tls.forEach(t => {
+        const row = el("div", "lib-row");
+        row.appendChild(el("div", "nm", t.title + (t.ref ? "  [" + t.ref + "]" : "")));
+        row.appendChild(el("span", "badge", t.events.length + (t.events.length === 1 ? " event" : " events")));
+        row.appendChild(el("span", "badge", localStr(t.created).slice(0, 10)));
+        const go = el("button", "btn btn-sm" + (tlNow && tlNow.id === t.id ? "" : " btn-primary"),
+            tlNow && tlNow.id === t.id ? "Open" : "Continue");
+        go.addEventListener("click", () => { tlNow = t; evEdit = null; saveTls(); drawTlTab(); });
+        row.appendChild(go);
+        const x = el("button", "btn btn-sm btn-danger", "x");
+        x.title = "Delete timeline";
+        x.addEventListener("click", () => {
+            if (!confirm(`Delete "${t.title}" and its ${t.events.length} event(s)?`)) return;
+            tls = tls.filter(y => y.id !== t.id);
+            if (tlNow && tlNow.id === t.id) tlNow = null;
+            saveTls();
+            drawTlTab();
+        });
+        row.appendChild(x);
+        host.appendChild(row);
+    });
+}
+
+function drawTlTab() {
+    drawTlList();
+    const on = !!tlNow;
+    $("#tlHeadPanel").hidden = !on;
+    $("#tlWork").hidden = !on;
+    $("#tlLists").hidden = on && !tlListsOpen;
+    $("#btnTlLists").textContent = tlListsOpen ? "Hide list" : "All timelines";
+    if (!on) return;
+
+    $("#tlTitleText").textContent = tlNow.title;
+    $("#tlTitle").value = tlNow.title || "";
+    $("#tlRef").value = tlNow.ref || "";
+    $("#tlWho").value = tlNow.who || "";
+    if (!$("#evWhen").value) $("#evWhen").value = toLocalInput(new Date().toISOString());
+
+    const ev = evSorted(tlNow);
+    $("#tlSpan").textContent = ev.length > 1 ? elapsed(ev[0].t, ev[ev.length - 1].t) : (ev.length ? "single event" : "no events");
+    $("#tlSpan").classList.toggle("live", ev.length > 1);
+    $("#tlSpanNote").textContent = ev.length
+        ? "first event " + localStr(ev[0].t) + " (" + tzLabel() + ")"
+        : "times are recorded in " + tzLabel();
+
+    const chips = $("#tlChips");
+    chips.textContent = "";
+    const chip = (label, value) => {
+        const c = el("span", "chip");
+        c.appendChild(el("b", null, value));
+        c.appendChild(document.createTextNode(" " + label));
+        chips.appendChild(c);
+    };
+    chip(ev.length === 1 ? "event" : "events", String(ev.length));
+    const srcs = {};
+    ev.forEach(e => { if (e.source) srcs[e.source] = true; });
+    chip(Object.keys(srcs).length === 1 ? "source" : "sources", String(Object.keys(srcs).length));
+    if (tlNow.ref) {
+        const c = el("span", "chip");
+        c.appendChild(el("b", null, tlNow.ref));
+        chips.appendChild(c);
+    }
+
+    const dl = $("#evSources");
+    dl.textContent = "";
+    Object.keys(srcs).forEach(x => { const o = el("option"); o.value = x; dl.appendChild(o); });
+
+    drawEvents();
+}
+
+function drawEvents() {
+    const host = $("#tlEvents");
+    host.textContent = "";
+    const ev = evSorted(tlNow);
+    if (!ev.length) {
+        host.appendChild(el("div", "empty", "Nothing logged yet. Add the first thing you know happened."));
+        return;
+    }
+    ev.forEach(e => {
+        if (evEdit === e.id) { host.appendChild(eventEditor(e)); return; }
+        const row = el("div", "tl");
+        row.appendChild(el("div", "tl-when", localStr(e.t)));
+        const body = el("div", "tl-body");
+        const line = el("div", "tl-txt");
+        if (e.source) {
+            const b = el("span", "badge ev-src", e.source);
+            b.style.marginRight = "7px";
+            line.appendChild(b);
+        }
+        line.appendChild(document.createTextNode(e.text || ""));
+        body.appendChild(line);
+        if (e.note) body.appendChild(el("div", "tl-note", e.note));
+        if (e.edited) body.appendChild(el("div", "tl-edited", "edited " + clock(e.edited)));
+        row.appendChild(body);
+        const ed = el("button", "btn btn-sm btn-ghost noprint", "Edit");
+        ed.addEventListener("click", () => { evEdit = e.id; drawEvents(); });
+        row.appendChild(ed);
+        host.appendChild(row);
+    });
+}
+
+function eventEditor(e) {
+    const box = el("div", "tl tl-editing");
+
+    const top = el("div", "row");
+    const when = el("input", "field");
+    when.type = "datetime-local";
+    when.value = toLocalInput(e.t);
+    when.style.flex = "0 1 220px";
+    when.style.width = "auto";
+    top.appendChild(when);
+    const src = el("input", "field");
+    src.type = "text";
+    src.value = e.source || "";
+    src.placeholder = "Source";
+    src.style.flex = "1 1 160px";
+    src.style.width = "auto";
+    top.appendChild(src);
+    box.appendChild(top);
+
+    const txt = el("input", "field");
+    txt.type = "text";
+    txt.value = e.text || "";
+    txt.placeholder = "What happened";
+    box.appendChild(txt);
+
+    const note = el("textarea", "field");
+    note.rows = 2;
+    note.value = e.note || "";
+    note.placeholder = "Detail";
+    box.appendChild(note);
+
+    const acts = el("div", "row");
+    const save = el("button", "btn btn-sm btn-primary", "Save event");
+    save.addEventListener("click", () => {
+        const iso = fromLocalInput(when.value);
+        if (!iso) { notify("Set a date and time for the event", true); return; }
+        const changed = iso !== e.t || src.value !== (e.source || "") ||
+            txt.value !== (e.text || "") || note.value !== (e.note || "");
+        e.t = iso;
+        e.source = src.value.trim();
+        e.text = txt.value;
+        e.note = note.value;
+        if (changed) e.edited = new Date().toISOString();
+        evEdit = null;
+        saveTls();
+        drawTlTab();
+        if (changed) notify("Event updated");
+    });
+    acts.appendChild(save);
+    const cancel = el("button", "btn btn-sm", "Cancel");
+    cancel.addEventListener("click", () => { evEdit = null; drawEvents(); });
+    acts.appendChild(cancel);
+    acts.appendChild(el("div", "spacer"));
+    const del = el("button", "btn btn-sm btn-danger", "Delete");
+    del.addEventListener("click", () => {
+        if (!confirm("Delete this event?")) return;
+        tlNow.events = tlNow.events.filter(x => x.id !== e.id);
+        evEdit = null;
+        saveTls();
+        drawTlTab();
+    });
+    acts.appendChild(del);
+    box.appendChild(acts);
+    return box;
+}
+
+/* ---------- exports ---------- */
+function tlFname(ext) {
+    return `timeline-${slug(tlNow.title)}-${localStr(tlNow.created).slice(0, 10)}.${ext}`;
+}
+function exportTlMd() {
+    if (!tlNow) return;
+    const ev = evSorted(tlNow), L = [];
+    L.push("# Incident timeline: " + (tlNow.title || "Untitled incident"), "");
+    L.push("- Incident ref: " + (tlNow.ref || "not recorded"));
+    L.push("- Kept by: " + (tlNow.who || "not recorded"));
+    L.push("- Started: " + localStr(tlNow.created));
+    L.push("- Events: " + ev.length);
+    if (ev.length > 1) L.push("- Span: " + elapsed(ev[0].t, ev[ev.length - 1].t) +
+        " (" + localStr(ev[0].t) + " to " + localStr(ev[ev.length - 1].t) + ")");
+    L.push("- All times " + tzLabel());
+    L.push("");
+    L.push("## Timeline", "");
+    ev.forEach(e => {
+        L.push(`- **${localStr(e.t)}**${e.source ? " [" + e.source + "]" : ""} ${e.text || ""}`);
+        if (e.note) String(e.note).split(/\r?\n/).forEach(l => L.push("  - " + l));
+    });
+    L.push("");
+    const srcs = {};
+    ev.forEach(e => { if (e.source) srcs[e.source] = (srcs[e.source] || 0) + 1; });
+    const keys = Object.keys(srcs);
+    if (keys.length) {
+        L.push("## Sources used", "");
+        keys.sort((a, b) => srcs[b] - srcs[a]).forEach(k => L.push(`- ${k} (${srcs[k]})`));
+        L.push("");
+    }
+    L.push("---", "", `Recorded with ${APP.id} v${APP.version}.`, "");
+    download(tlFname("md"), L.join("\n"), "text/markdown;charset=utf-8");
+    notify("Timeline exported");
+}
+function exportTlJson() {
+    if (!tlNow) return;
+    const out = {
+        app: APP.id + "-timeline", schema: APP.schema, version: APP.version,
+        exported: new Date().toISOString(), timezone: tzLabel(),
+        timeline: Object.assign({}, tlNow, { events: evSorted(tlNow) })
+    };
+    download(tlFname("json"), JSON.stringify(out, null, 2), "application/json");
+    notify("Timeline exported");
+}
+
+/* ---------- wiring ---------- */
+let tlListsOpen = false;
+(function wireTl() {
+    $("#btnTlNew").addEventListener("click", () => {
+        const name = $("#tlNewName").value.trim();
+        if (!name) { notify("Give the incident a name", true); return; }
+        $("#tlNewName").value = "";
+        tlListsOpen = false;
+        newTimeline(name);
+    });
+    $("#tlNewName").addEventListener("keydown", e => { if (e.key === "Enter") $("#btnTlNew").click(); });
+
+    $("#btnTlLists").addEventListener("click", () => { tlListsOpen = !tlListsOpen; drawTlTab(); });
+    $("#btnEvAdd").addEventListener("click", addEvent);
+    $("#evText").addEventListener("keydown", e => { if (e.key === "Enter") addEvent(); });
+    $("#btnEvNow").addEventListener("click", () => {
+        $("#evWhen").value = toLocalInput(new Date().toISOString());
+    });
+    $("#btnTlMd").addEventListener("click", exportTlMd);
+    $("#btnTlJson").addEventListener("click", exportTlJson);
+    $("#btnTlPrint").addEventListener("click", () => window.print());
+    $("#btnTlDelete").addEventListener("click", () => {
+        if (!tlNow) return;
+        if (!confirm(`Delete "${tlNow.title}" and its ${tlNow.events.length} event(s)?`)) return;
+        tls = tls.filter(t => t.id !== tlNow.id);
+        tlNow = null;
+        tlListsOpen = true;
+        saveTls();
+        drawTlTab();
+    });
+
+    [["#tlTitle", "title"], ["#tlRef", "ref"], ["#tlWho", "who"]].forEach(([sel, key]) => {
+        $(sel).addEventListener("input", e => {
+            if (!tlNow) return;
+            tlNow[key] = e.target.value;
+            if (key === "title") $("#tlTitleText").textContent = e.target.value || "Untitled incident";
+            if (key === "who") store.set("operator", e.target.value);
+            saveTls();
+            drawTlList();
+        });
+    });
+})();
+
 restore();
 render();
+setSplit(split);
+loadTls();
+drawTlTab();
 loadRunData();
 drawRunTab();
 document.documentElement.dataset.print = "build";
