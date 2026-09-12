@@ -1,7 +1,8 @@
 # flow-state
 
-Build a process as a flowchart, get a runbook out of it. One HTML file, no build step,
-no dependencies, no network calls. Open it from disk or serve it as a static page.
+Build a process as a flowchart, get a runbook out of it. Then play the runbook and log each event. 
+
+One HTML file, no build step, no dependencies, no network calls. Open it from disk or serve it as a static page.
 
 ## What it does
 
