@@ -1,0 +1,2377 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="referrer" content="no-referrer">
+<meta name="robots" content="noindex, nofollow">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; connect-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'">
+<title>flow-state</title>
+
+<style>
+
+/* ============================================================
+   flow-state
+   One structural stylesheet driven by per-theme design tokens.
+   Two themes, same terminal styling, opposite palettes.
+   ============================================================ */
+
+:root {
+    --wrap: 1180px;
+    --font: 'Fira Code', 'JetBrains Mono', 'Consolas', monospace;
+}
+
+/* ---------- Tokens: Dark (default) ---------- */
+:root,
+html[data-theme="dark"] {
+    --bg:          #0b0e14;
+    --card:        #161b25;
+    --sunken:      #11161f;
+    --raised:      #1b212d;
+    --line:        #262d3a;
+    --line-soft:   #1e2431;
+    --fg:          #c7ccd6;
+    --fg-dim:      #7b8496;
+    --fg-faint:    #59616f;
+    --accent:      #58a6ff;
+    --accent-soft: rgba(88, 166, 255, 0.14);
+    --accent-ink:  #06111f;
+    --toggle-on:   #3fb950;
+    --toggle-ink:  #06210c;
+    --radius:      10px;
+    --radius-sm:   6px;
+    --shadow:      0 18px 50px -18px rgba(0, 0, 0, 0.75);
+    --bad:         #f87171;
+    --warn:        #d29922;
+    --ok:          #3fb950;
+}
+
+/* ---------- Tokens: Light ---------- */
+html[data-theme="light"] {
+    --bg:          #e9edf2;
+    --card:        #ffffff;
+    --sunken:      #f3f5f8;
+    --raised:      #fbfcfd;
+    --line:        #d3dae3;
+    --line-soft:   #e5eaf0;
+    --fg:          #0e1620;
+    --fg-dim:      #5f6b7a;
+    --fg-faint:    #8b96a5;
+    --accent:      #0f766e;
+    --accent-soft: rgba(15, 118, 110, 0.10);
+    --accent-ink:  #ffffff;
+    --toggle-on:   #0f766e;
+    --toggle-ink:  #ffffff;
+    --radius:      10px;
+    --radius-sm:   6px;
+    --shadow:      0 1px 2px rgba(16, 24, 40, 0.05), 0 14px 36px -16px rgba(16, 24, 40, 0.28);
+    --bad:         #dc2626;
+    --warn:        #b45309;
+    --ok:          #0f766e;
+}
+
+/* ============================================================
+   Base
+   ============================================================ */
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    padding: 28px 20px 48px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font);
+    font-size: 13.5px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--accent); color: var(--accent-ink); }
+::placeholder { color: var(--fg-faint); opacity: 1; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ============================================================
+   Window
+   ============================================================ */
+.container {
+    width: 100%;
+    max-width: var(--wrap);
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+}
+
+.titlebar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 12px 11px 16px;
+    background: var(--sunken);
+    border-bottom: 1px solid var(--line-soft);
+}
+.dot { width: 11px; height: 11px; border-radius: 50%; }
+.dot:nth-child(1) { background: #ff5f56; }
+.dot:nth-child(2) { background: #ffbd2e; }
+.dot:nth-child(3) { background: #27c93f; }
+
+.titlebar-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 12.5px;
+    color: var(--fg-dim);
+    pointer-events: none;
+    white-space: nowrap;
+}
+.titlebar .spacer { flex: 1; }
+
+.icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 27px;
+    height: 27px;
+    padding: 0;
+    color: var(--fg-dim);
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: color 0.15s, border-color 0.15s;
+}
+.icon-btn:hover { color: var(--accent); border-color: var(--line); }
+.icon-btn svg {
+    width: 15px; height: 15px;
+    fill: none; stroke: currentColor;
+    stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round;
+}
+html[data-theme="dark"]  .ic-moon { display: none; }
+html[data-theme="light"] .ic-sun  { display: none; }
+
+/* ---------- Tab strip ---------- */
+.tabs {
+    display: flex;
+    padding: 0 8px;
+    background: var(--sunken);
+    border-bottom: 1px solid var(--line);
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar { display: none; }
+.tab {
+    font: inherit;
+    font-size: 12.5px;
+    color: var(--fg-dim);
+    background: transparent;
+    border: 0;
+    border-bottom: 2px solid transparent;
+    padding: 9px 15px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+.tab:hover { color: var(--fg); }
+.tab[aria-selected="true"] {
+    color: var(--accent);
+    background: var(--card);
+    border-bottom-color: var(--accent);
+}
+
+.body { padding: 20px 22px 24px; }
+section[hidden] { display: none; }
+
+.prompt { margin-bottom: 6px; font-size: 13px; }
+.prompt .path { color: var(--accent); }
+.prompt .chev { color: var(--fg-faint); }
+.comment { color: var(--fg-faint); font-size: 12.5px; margin-bottom: 20px; }
+
+/* ============================================================
+   Sections
+   ============================================================ */
+.section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+.section-header span {
+    font-size: 11px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+}
+.section-header span::before { content: '// '; color: var(--fg-faint); }
+
+.panel {
+    background: var(--sunken);
+    border: 1px solid var(--line-soft);
+    border-radius: var(--radius-sm);
+    padding: 16px;
+    margin-bottom: 16px;
+}
+
+/* ============================================================
+   Controls
+   ============================================================ */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 8px 13px;
+    font: inherit;
+    font-size: 12.5px;
+    color: var(--fg);
+    background: var(--raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+.btn:hover { color: var(--accent); border-color: var(--accent); background: var(--accent-soft); }
+.btn:active { transform: scale(0.985); }
+.btn:disabled { opacity: 0.55; cursor: default; }
+.btn:disabled:hover { color: var(--fg); border-color: var(--line); background: var(--raised); }
+
+.btn-primary { color: var(--accent-ink); background: var(--accent); border-color: var(--accent); }
+.btn-primary:hover { color: var(--accent-ink); background: var(--accent); filter: brightness(1.12); }
+.btn-danger:hover { color: var(--bad); border-color: var(--bad); background: transparent; }
+.btn-sm { padding: 5px 9px; font-size: 12px; }
+
+.field {
+    width: 100%;
+    font: inherit;
+    font-size: 12.5px;
+    color: var(--fg);
+    background: var(--raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 7px 10px;
+    outline: none;
+    transition: border-color 0.15s;
+}
+.field:hover { border-color: var(--fg-faint); }
+.field:focus { border-color: var(--accent); }
+textarea.field { line-height: 1.6; resize: vertical; }
+select.field { cursor: pointer; }
+
+label.f {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 11px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--fg-dim);
+}
+
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 14px; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.spacer { flex: 1; }
+
+.note { font-size: 11.5px; line-height: 1.65; color: var(--fg-dim); }
+.note code { color: var(--accent); }
+.log { font-size: 12px; color: var(--fg-dim); }
+.log .ok { color: var(--ok); } .log .warn { color: var(--warn); }
+.log .bad { color: var(--bad); } .log .a { color: var(--accent); }
+
+.empty {
+    padding: 26px;
+    text-align: center;
+    color: var(--fg-dim);
+    border: 1px dashed var(--line);
+    border-radius: var(--radius-sm);
+}
+
+/* ============================================================
+   Step cards (builder outline)
+   ============================================================ */
+.step {
+    background: var(--raised);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--line);
+    border-radius: var(--radius-sm);
+    padding: 11px 12px;
+    margin-bottom: 10px;
+}
+.step.t-start, .step.t-end { border-left-color: var(--accent); }
+.step.t-decision { border-left-color: var(--warn); }
+.step.t-parallel { border-left-color: var(--ok); }
+
+.step-head { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+.ref {
+    flex: 0 0 auto;
+    min-width: 30px;
+    padding: 3px 7px;
+    text-align: center;
+    font-size: 11.5px;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+}
+.step-head select.field { width: auto; min-width: 104px; }
+.step-label { width: 100%; }
+
+.outs { margin-top: 9px; padding-left: 12px; border-left: 1px dashed var(--line); }
+.out-row { display: flex; gap: 6px; align-items: center; margin-bottom: 6px; flex-wrap: wrap; }
+.out-row .arrow { color: var(--fg-faint); font-size: 12px; }
+.out-row input.field { flex: 1 1 130px; min-width: 90px; }
+.out-row select.field { flex: 2 1 190px; min-width: 140px; }
+
+/* ============================================================
+   Canvas
+   ============================================================ */
+.canvas-wrap {
+    position: relative;
+    overflow: auto;
+    max-height: 560px;
+    background: var(--raised);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+}
+.canvas-wrap svg { display: block; }
+
+.nd-box rect, .nd-box polygon { stroke-width: 1.4; }
+.nd-action rect      { fill: var(--card); stroke: var(--line); }
+.nd-start rect,
+.nd-end rect         { fill: var(--accent-soft); stroke: var(--accent); }
+.nd-decision polygon { fill: var(--card); stroke: var(--warn); }
+.nd-parallel polygon { fill: var(--card); stroke: var(--ok); }
+.nd-box text { fill: var(--fg); font-family: var(--font); font-size: 12px; }
+.nd-box .nd-kind { fill: var(--fg-faint); font-size: 9.5px; letter-spacing: 0.08em; }
+.nd-box .nd-ref  { fill: var(--fg-dim); font-size: 9.5px; }
+.nd-box { cursor: grab; }
+.nd-box.dragging { cursor: grabbing; }
+.edge { fill: none; stroke: var(--fg-faint); stroke-width: 1.4; }
+.elabel {
+    fill: var(--fg-dim); font-family: var(--font); font-size: 10.5px;
+    paint-order: stroke; stroke: var(--raised); stroke-width: 3px;
+}
+.lane-band { fill: none; stroke: var(--line); stroke-dasharray: 4 4; }
+.nd-now rect, .nd-now polygon { stroke: var(--accent); stroke-width: 3; }
+.nd-done rect, .nd-done polygon { opacity: 0.4; }
+.nd-done text { opacity: 0.45; }
+.lane-name { fill: var(--fg-dim); font-family: var(--font); font-size: 10.5px; letter-spacing: 0.08em; }
+
+/* ============================================================
+   Run tab
+   ============================================================ */
+.step-title { font-size: 13px; color: var(--fg); margin-bottom: 6px; }
+.step-meta { font-size: 11.5px; color: var(--fg-dim); margin-bottom: 4px; }
+.step-meta b { color: var(--fg); font-weight: 500; }
+
+.lib-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line-soft);
+    font-size: 12.5px;
+}
+.lib-row:last-child { border-bottom: none; }
+.lib-row .nm { flex: 1 1 220px; color: var(--fg); }
+.badge {
+    font-size: 10.5px;
+    padding: 2px 6px;
+    color: var(--fg-dim);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-sm);
+}
+.badge.live { color: var(--ok); border-color: var(--ok); }
+.badge.shut { color: var(--fg-faint); }
+
+.tl {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--line-soft);
+    font-size: 12px;
+}
+.tl:last-child { border-bottom: none; }
+.tl-t { flex: 0 0 auto; color: var(--fg-faint); }
+.tl-ref { flex: 0 0 auto; min-width: 26px; color: var(--accent); }
+.tl-body { flex: 1; min-width: 0; }
+.tl-txt { color: var(--fg); }
+.tl-note { color: var(--fg-dim); white-space: pre-wrap; }
+.tl.k-note .tl-ref, .tl.k-start .tl-ref, .tl.k-finish .tl-ref { color: var(--fg-dim); }
+.tl.k-offscript .tl-ref { color: var(--warn); }
+.tl.k-skip .tl-txt, .tl.k-left .tl-txt { color: var(--warn); }
+
+/* ---------- Preview overlay ---------- */
+.overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 400;
+    display: none;
+    padding: 22px;
+    background: rgba(0, 0, 0, 0.72);
+    overflow: auto;
+}
+.overlay.show { display: block; }
+.overlay-inner {
+    max-width: 1600px;
+    margin: 0 auto;
+    padding: 16px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+}
+.overlay-inner svg { width: 100%; height: auto; }
+
+/* ============================================================
+   Notification
+   ============================================================ */
+.notification {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translate(-50%, 20px);
+    z-index: 500;
+    padding: 10px 18px;
+    font-size: 12.5px;
+    color: var(--accent-ink);
+    background: var(--accent);
+    border-radius: var(--radius-sm);
+    box-shadow: var(--shadow);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s, transform 0.22s;
+}
+.notification.show { opacity: 1; transform: translate(-50%, 0); }
+.notification.error { color: #fff; background: var(--bad); }
+
+/* ============================================================
+   Responsive
+   ============================================================ */
+@media (max-width: 640px) {
+    body { padding: 14px 10px 32px; }
+    .body { padding: 16px; }
+    .titlebar-title { display: none; }
+    .grid { grid-template-columns: 1fr; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+    }
+}
+
+/* ============================================================
+   Print: one light palette for both themes
+   ============================================================ */
+@media print {
+    :root, html[data-theme="dark"], html[data-theme="light"] {
+        color-scheme: light;
+        --bg: #ffffff; --card: #ffffff; --sunken: #fafafa; --raised: #ffffff;
+        --line: #999999; --line-soft: #cccccc;
+        --fg: #111111; --fg-dim: #555555; --fg-faint: #777777;
+        --accent: #0b4f8a; --accent-soft: transparent; --accent-ink: #ffffff;
+        --shadow: none;
+    }
+    body { padding: 0; display: block; }
+    .container { max-width: none; border: none; box-shadow: none; }
+    .titlebar, .tabs, .drop, .notification, .btn, .overlay, .noprint { display: none !important; }
+    .body { padding: 0; }
+    section[hidden] { display: block !important; }
+    .panel { break-inside: avoid; page-break-inside: avoid; }
+    .step { break-inside: avoid; page-break-inside: avoid; }
+    .canvas-wrap { max-height: none; overflow: visible; border: none; }
+    .canvas-wrap svg { width: 100%; height: auto; }
+    html[data-print="build"] #pane-runbook { page-break-before: always; }
+    html[data-print="build"] #pane-run,
+    html[data-print="build"] #pane-about,
+    html[data-print="runbook"] #pane-build,
+    html[data-print="runbook"] #pane-run,
+    html[data-print="runbook"] #pane-about,
+    html[data-print="run"] #pane-build,
+    html[data-print="run"] #pane-runbook,
+    html[data-print="run"] #pane-about,
+    html[data-print="about"] #pane-build,
+    html[data-print="about"] #pane-runbook,
+    html[data-print="about"] #pane-run { display: none !important; }
+    .field { border-color: #bbb; }
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="titlebar">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="titlebar-title">flow-state</div>
+        <div class="spacer"></div>
+        <button class="icon-btn" id="themeBtn" type="button" aria-pressed="false" title="Switch theme">
+            <svg class="ic-sun" viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="12" cy="12" r="4.2"></circle>
+                <path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6"></path>
+            </svg>
+            <svg class="ic-moon" viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M20 14.2A8.2 8.2 0 0 1 9.8 4a8.2 8.2 0 1 0 10.2 10.2z"></path>
+            </svg>
+        </button>
+    </div>
+
+    <div class="tabs" role="tablist">
+        <button class="tab" id="tab-build" role="tab" aria-selected="true" aria-controls="pane-build">build</button>
+        <button class="tab" id="tab-runbook" role="tab" aria-selected="false" aria-controls="pane-runbook">runbook</button>
+        <button class="tab" id="tab-run" role="tab" aria-selected="false" aria-controls="pane-run">run</button>
+        <button class="tab" id="tab-about" role="tab" aria-selected="false" aria-controls="pane-about">about</button>
+    </div>
+
+    <div class="body">
+
+        <div class="prompt"><span class="path">~/flow-state</span> <span class="chev">&gt;</span> <span id="promptState">ready</span></div>
+        <div class="comment"># build a process as a flowchart, get a runbook out of it, runs in your browser, nothing is uploaded</div>
+
+        <!-- ============================ BUILD ============================ -->
+        <section id="pane-build" role="tabpanel" aria-labelledby="tab-build">
+
+            <div class="panel noprint">
+                <div class="row">
+                    <button class="btn" id="btnLoad">Load config</button>
+                    <button class="btn btn-primary" id="btnSave">Save config</button>
+                    <button class="btn" id="btnSvg">Export SVG</button>
+                    <button class="btn" id="btnPng">Export PNG</button>
+                    <button class="btn" id="btnPrint">Print</button>
+                    <div class="spacer"></div>
+                    <button class="btn btn-danger" id="btnReset">Reset</button>
+                </div>
+                <input type="file" id="fileIn" accept=".json,application/json" hidden>
+                <div class="note" style="margin-top:10px">Ctrl+S saves, Ctrl+O loads. Work is kept in this browser until you reset.</div>
+            </div>
+
+            <div class="panel">
+                <div class="section-header"><span>Process</span></div>
+                <div class="grid">
+                    <label class="f">Name<input type="text" class="field" id="mTitle" placeholder="Phishing email reported"></label>
+                    <label class="f">Author<input type="text" class="field" id="mAuthor" placeholder="Your name"></label>
+                    <label class="f">Date<input type="date" class="field" id="mDate"></label>
+                </div>
+            </div>
+
+            <div class="panel" id="starterPanel">
+                <div class="section-header"><span>Start here</span></div>
+                <div class="note" style="margin-bottom:12px">
+                    A flow is a list of steps. Each step points at the step that comes next.
+                    Use an <b>action</b> for something you do, a <b>decision</b> when the path splits on a yes/no,
+                    a <b>parallel</b> step when several things happen at once, and an <b>end</b> to close a path.
+                    Swimlanes are columns: put a separate workstream in its own lane.
+                </div>
+                <div class="row">
+                    <button class="btn btn-primary" id="btnStarter">Create first step</button>
+                    <button class="btn" id="btnExample">Load demo</button>
+                </div>
+            </div>
+
+            <div class="panel" id="lanesPanel">
+                <div class="section-header">
+                    <span>Swimlanes</span>
+                    <button class="btn btn-sm noprint" id="btnLane">Add lane</button>
+                </div>
+                <div id="lanes"></div>
+            </div>
+
+            <div class="panel">
+                <div class="section-header">
+                    <span>Flowchart</span>
+                    <div class="row noprint">
+                        <button class="btn btn-sm" id="btnZoomOut">-</button>
+                        <span class="log" id="zoomLabel">100%</span>
+                        <button class="btn btn-sm" id="btnZoomIn">+</button>
+                        <button class="btn btn-sm" id="btnFit">Fit</button>
+                        <button class="btn btn-sm" id="btnBig">Full preview</button>
+                        <button class="btn btn-sm" id="btnNudgeReset">Reset layout</button>
+                    </div>
+                </div>
+                <div class="canvas-wrap" id="canvasWrap"></div>
+                <div class="note noprint" style="margin-top:10px">Drag a box to nudge it. Scroll inside the frame to move around.</div>
+            </div>
+
+            <div class="panel">
+                <div class="section-header">
+                    <span>Steps</span>
+                    <button class="btn btn-sm noprint" id="btnAddLoose">Add step</button>
+                </div>
+                <div id="steps"></div>
+                <div class="log" style="margin-top:10px" id="stat"></div>
+            </div>
+
+        </section>
+
+        <!-- ============================ RUNBOOK ============================ -->
+        <section id="pane-runbook" role="tabpanel" aria-labelledby="tab-runbook" hidden>
+
+            <div class="panel">
+                <div class="section-header">
+                    <span>Runbook header</span>
+                    <div class="row noprint">
+                        <button class="btn btn-sm" id="btnMd">Export Markdown</button>
+                        <button class="btn btn-sm" id="btnPrint2">Print</button>
+                    </div>
+                </div>
+                <div class="grid" style="margin-bottom:14px">
+                    <label class="f">Owner team<input type="text" class="field" id="mTeam" placeholder="SecOps"></label>
+                    <label class="f">Severity / scope<input type="text" class="field" id="mSev" placeholder="Sev 3, single mailbox"></label>
+                </div>
+                <label class="f">Purpose
+                    <textarea class="field" id="mPurpose" rows="3" placeholder="What this process is for and when to run it"></textarea>
+                </label>
+            </div>
+
+            <div class="panel">
+                <div class="section-header"><span>Steps</span></div>
+                <div class="note noprint" style="margin-bottom:12px">
+                    Same steps as the flowchart. Anything edited here shows up there.
+                </div>
+                <div id="runbook"></div>
+            </div>
+
+        </section>
+
+        <!-- ============================ RUN ============================ -->
+        <section id="pane-run" role="tabpanel" aria-labelledby="tab-run" hidden>
+
+            <div class="panel noprint">
+                <div class="section-header"><span>Processes</span></div>
+                <div class="note" style="margin-bottom:12px">
+                    Import a saved config to run it. Nothing is edited here: the flow is followed as written,
+                    and everything you do is timestamped.
+                </div>
+                <div class="drop" id="runDrop" tabindex="0" role="button">
+                    <b>Drop a config here</b>
+                    or click to browse
+                </div>
+                <input type="file" id="runFile" accept=".json,application/json" hidden>
+                <div class="row" style="margin-top:12px">
+                    <button class="btn btn-sm" id="btnUseCurrent">Add the flow I am building</button>
+                </div>
+                <div id="libList" style="margin-top:14px"></div>
+            </div>
+
+            <div class="panel noprint">
+                <div class="section-header"><span>Runs</span></div>
+                <div id="runsList"></div>
+            </div>
+
+            <div class="panel" id="runHeadPanel" hidden>
+                <div class="section-header">
+                    <span>Run record</span>
+                    <div class="row noprint">
+                        <button class="btn btn-sm" id="btnRunMd">Export Markdown</button>
+                        <button class="btn btn-sm" id="btnRunJson">Export JSON</button>
+                        <button class="btn btn-sm" id="btnRunPrint">Print</button>
+                        <button class="btn btn-sm btn-primary" id="btnRunFinish">Finish run</button>
+                        <button class="btn btn-sm" id="btnRunClose">Close</button>
+                    </div>
+                </div>
+                <div class="step-title" id="runTitle"></div>
+                <div class="grid" style="margin-bottom:12px">
+                    <label class="f">Operator<input type="text" class="field" id="rOperator" placeholder="Who is running this"></label>
+                    <label class="f">Incident ref<input type="text" class="field" id="rRef" placeholder="Ticket or case number"></label>
+                </div>
+                <div class="log" id="runMeta"></div>
+            </div>
+
+            <div class="panel" id="runNowPanel" hidden>
+                <div class="section-header"><span>Now</span></div>
+                <div id="runNow"></div>
+            </div>
+
+            <div class="panel noprint" id="runFlowPanel" hidden>
+                <div class="section-header">
+                    <span>Position</span>
+                    <button class="btn btn-sm" id="btnRunBig">Full preview</button>
+                </div>
+                <div class="canvas-wrap" id="runFlowWrap" style="max-height:400px"></div>
+            </div>
+
+            <div class="panel noprint" id="runOffPanel" hidden>
+                <div class="section-header"><span>Off script</span></div>
+                <label class="f">Step taken<input type="text" class="field" id="offLabel" placeholder="Something the flow does not cover"></label>
+                <label class="f" style="margin-top:10px">Note<textarea class="field" id="offNote" rows="2" placeholder="What you did and why"></textarea></label>
+                <div class="row" style="margin-top:10px">
+                    <button class="btn btn-sm" id="btnOffStep">Log off-script step</button>
+                    <button class="btn btn-sm" id="btnOffNote">Log note only</button>
+                </div>
+            </div>
+
+            <div class="panel" id="runTlPanel" hidden>
+                <div class="section-header"><span>Timeline</span></div>
+                <div id="runTimeline"></div>
+            </div>
+
+        </section>
+
+        <!-- ============================ ABOUT ============================ -->
+        <section id="pane-about" role="tabpanel" aria-labelledby="tab-about" hidden>
+            <div class="panel">
+                <div class="section-header"><span>About</span></div>
+                <div class="note">
+                    flow-state turns a process into two views of the same thing: a flowchart you can print or
+                    hand over, and a runbook with the detail each step needs. Build it on the build tab, fill in
+                    the detail on the runbook tab, and save the config to carry both.
+                    <br><br>
+                    Everything runs client side. There is no network call and no analytics. The config file is
+                    plain JSON, so it diffs and reviews like any other artefact.
+                    <br><br>
+                    The run tab is the other half. Import a config, start a run, and the tool walks the flow
+                    with you: it shows only the steps that are live right now, you pick the outcome at each
+                    decision, and every choice, note and skip is timestamped into a record you can export or
+                    print. Off-script actions get logged too rather than being lost.
+                    Imported processes and runs are kept in this browser separately from the flow you are
+                    building, so resetting the builder does not touch them.
+                </div>
+            </div>
+        </section>
+
+        <div class="note">flow-state v1.0.0 &middot; MIT &middot; <code>github.com/shanemc92</code></div>
+    </div>
+</div>
+
+<div class="overlay noprint" id="overlay">
+    <div class="overlay-inner">
+        <div class="row" style="margin-bottom:12px">
+            <div class="log" id="bigTitle"></div>
+            <div class="spacer"></div>
+            <button class="btn btn-sm" id="btnBigClose">Close</button>
+        </div>
+        <div id="bigHost"></div>
+    </div>
+</div>
+
+<div class="notification" id="notification" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+
+/* ---------- app identity ---------- */
+const APP = { id: "flow-state", version: "1.0.0", schema: 1 };
+
+/* ---------- dom helpers ---------- */
+const $  = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+const el = (tag, cls, txt) => {
+    const n = document.createElement(tag);
+    if (cls) n.className = cls;
+    if (txt != null) n.textContent = txt;
+    return n;
+};
+const NS = "http://www.w3.org/2000/svg";
+const sv = (tag, cls) => {
+    const n = document.createElementNS(NS, tag);
+    if (cls) n.setAttribute("class", cls);
+    return n;
+};
+const today = () => new Date().toISOString().slice(0, 10);
+const uid = () => Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-3);
+
+/* ---------- storage (file:// and private mode safe) ---------- */
+const store = {
+    get(k)   { try { return localStorage.getItem(APP.id + ":" + k); } catch (e) { return null; } },
+    set(k,v) { try { localStorage.setItem(APP.id + ":" + k, v); return true; } catch (e) { return false; } },
+    del(k)   { try { localStorage.removeItem(APP.id + ":" + k); } catch (e) {} }
+};
+
+/* ---------- notification ---------- */
+let notifyT;
+function notify(msg, isError) {
+    const n = $("#notification");
+    n.textContent = msg;
+    n.classList.toggle("error", !!isError);
+    n.classList.add("show");
+    clearTimeout(notifyT);
+    notifyT = setTimeout(() => n.classList.remove("show"), 2200);
+}
+
+/* ---------- theme ---------- */
+const themeBtn = $("#themeBtn");
+function applyTheme(theme) {
+    const t = theme === "light" ? "light" : "dark";
+    document.documentElement.dataset.theme = t;
+    themeBtn.setAttribute("aria-pressed", String(t === "light"));
+    themeBtn.title = t === "dark" ? "Switch to light" : "Switch to dark";
+}
+themeBtn.addEventListener("click", () => {
+    const next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    applyTheme(next);
+    if (!store.set("theme", next))
+        notify("Theme changed for this session only, saving it needs the page served over http");
+});
+applyTheme(store.get("theme") || "dark");
+
+/* ---------- tabs ---------- */
+const TABS = [["build", "pane-build"], ["runbook", "pane-runbook"], ["run", "pane-run"], ["about", "pane-about"]];
+function tab(which) {
+    TABS.forEach(([id, pane]) => {
+        $("#tab-" + id).setAttribute("aria-selected", String(id === which));
+        $("#" + pane).hidden = id !== which;
+    });
+    document.documentElement.dataset.print = which;
+    if (which === "runbook") drawRunbook();
+    if (which === "run") drawRunTab();
+    if (which === "build") { drawSteps(); drawCanvas(); }
+}
+TABS.forEach(([id]) => $("#tab-" + id).addEventListener("click", () => tab(id)));
+
+/* ---------- files ---------- */
+function download(name, text, type) {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([text], { type: type || "text/plain;charset=utf-8" }));
+    a.download = name;
+    a.click();
+    setTimeout(() => { try { URL.revokeObjectURL(a.href); } catch (e) {} }, 1000);
+}
+function read(file, cb) {
+    const r = new FileReader();
+    r.onload = () => cb(String(r.result), file);
+    r.onerror = () => notify("Could not read that file", true);
+    r.readAsText(file);
+}
+const slug = s => (s || APP.id).replace(/[^a-z0-9]+/gi, "-").toLowerCase().replace(/^-|-$/g, "");
+const fname = ext => `${slug(state.meta.title)}-${state.meta.date || today()}.${ext}`;
+
+/* ============================================================
+   State
+   ============================================================ */
+const TYPES = ["start", "action", "decision", "parallel", "end"];
+
+function blankState() {
+    return {
+        schema: APP.schema,
+        app: APP.id,
+        meta: { title: "", author: "", date: today(), team: "", sev: "", purpose: "" },
+        lanes: [{ id: "lane1", name: "Main" }],
+        nodes: [],
+        zoom: 1
+    };
+}
+let state = blankState();
+
+function persist() { store.set("state", JSON.stringify(state)); }
+function restore() {
+    const raw = store.get("state");
+    if (!raw) return false;
+    try {
+        const d = JSON.parse(raw);
+        if (d && d.app === APP.id) { state = normalise(d); return true; }
+    } catch (e) {}
+    return false;
+}
+
+function normalise(d) {
+    const s = Object.assign(blankState(), d);
+    s.meta = Object.assign(blankState().meta, d.meta || {});
+    if (!Array.isArray(s.lanes) || !s.lanes.length) s.lanes = [{ id: "lane1", name: "Main" }];
+    if (!Array.isArray(s.nodes)) s.nodes = [];
+    s.nodes.forEach(n => {
+        n.id = n.id || uid();
+        n.type = TYPES.indexOf(n.type) < 0 ? "action" : n.type;
+        n.label = n.label || "";
+        n.lane = s.lanes.some(l => l.id === n.lane) ? n.lane : s.lanes[0].id;
+        n.owner = n.owner || "";
+        n.detail = n.detail || "";
+        n.evidence = n.evidence || "";
+        n.outs = Array.isArray(n.outs) ? n.outs : [];
+        n.outs.forEach(o => { o.label = o.label || ""; o.to = o.to || ""; });
+        n.pos = n.pos && typeof n.pos === "object" ? { dx: +n.pos.dx || 0, dy: +n.pos.dy || 0 } : { dx: 0, dy: 0 };
+    });
+    s.zoom = +s.zoom || 1;
+    return s;
+}
+
+const byId = (id, src) => (src || state).nodes.find(n => n.id === id) || null;
+const laneById = (id, src) => {
+    const G = src || state;
+    return G.lanes.find(l => l.id === id) || G.lanes[0] || { name: "lane" };
+};
+
+/* ---------- flow order and refs ---------- */
+function order(src) {
+    const G = src || state;
+    const seen = new Set(), out = [];
+    const walk = n => {
+        if (!n || seen.has(n.id)) return;
+        seen.add(n.id);
+        out.push(n);
+        n.outs.forEach(o => walk(byId(o.to, G)));
+    };
+    G.nodes.filter(n => n.type === "start").forEach(walk);
+    G.nodes.forEach(n => { if (!seen.has(n.id)) { seen.add(n.id); out.push(n); } });
+    return out;
+}
+function refs(src) {
+    const m = {};
+    order(src).forEach((n, i) => m[n.id] = i + 1);
+    return m;
+}
+
+/* ---------- graph edits ---------- */
+function addNode(opts) {
+    const n = Object.assign({
+        id: uid(), type: "action", label: "", lane: state.lanes[0].id,
+        owner: "", detail: "", evidence: "", outs: [], pos: { dx: 0, dy: 0 }
+    }, opts || {});
+    state.nodes.push(n);
+    return n;
+}
+function addAfter(node, label) {
+    const n = addNode({ lane: node.lane });
+    node.outs.push({ label: label || "", to: n.id });
+    return n;
+}
+function removeNode(node) {
+    state.nodes = state.nodes.filter(n => n.id !== node.id);
+    state.nodes.forEach(n => { n.outs = n.outs.filter(o => o.to !== node.id); });
+}
+function defaultOuts(node) {
+    if (node.type === "end") { node.outs = []; return; }
+    if (node.type === "decision" && node.outs.length < 2) {
+        while (node.outs.length < 2) node.outs.push({ label: node.outs.length ? "No" : "Yes", to: "" });
+        if (!node.outs[0].label) node.outs[0].label = "Yes";
+        if (!node.outs[1].label) node.outs[1].label = "No";
+    }
+    if ((node.type === "action" || node.type === "start") && node.outs.length > 1)
+        node.outs = node.outs.slice(0, 1);
+}
+
+/* ============================================================
+   Layout
+   ============================================================ */
+const SLOTW = 240, SGAP = 26, LGAP = 48, VGAP = 56, PAD = 26, LANEH = 30, CHW = 7.2;
+
+function wrap(text, maxChars) {
+    const words = String(text || "").split(/\s+/).filter(Boolean);
+    if (!words.length) return ["(unnamed)"];
+    const lines = [];
+    let cur = "";
+    words.forEach(w => {
+        if (!cur) { cur = w; return; }
+        if ((cur + " " + w).length <= maxChars) cur += " " + w;
+        else { lines.push(cur); cur = w; }
+    });
+    if (cur) lines.push(cur);
+    if (lines.length > 4) { lines.length = 4; lines[3] = lines[3].slice(0, maxChars - 1) + "\u2026"; }
+    return lines.map(l => l.length > maxChars ? l.slice(0, maxChars - 1) + "\u2026" : l);
+}
+
+function measure(n) {
+    const diamond = n.type === "decision";
+    const w = diamond ? 232 : (n.type === "parallel" ? 214 : 200);
+    const inner = diamond ? Math.floor((w * 0.56) / CHW) : Math.floor((w - 24) / CHW);
+    const lines = wrap(n.label, inner);
+    const h = diamond
+        ? Math.max(96, lines.length * 17 + 60)
+        : Math.max(54, lines.length * 17 + 28);
+    return { w, h, lines, diamond };
+}
+
+function depths(src) {
+    const G = src || state;
+    const d = {};
+    G.nodes.forEach(n => d[n.id] = 0);
+    const cap = G.nodes.length + 1;
+    for (let i = 0; i < cap; i++) {
+        let changed = false;
+        G.nodes.forEach(n => n.outs.forEach(o => {
+            const t = byId(o.to, G);
+            if (!t || t.id === n.id) return;
+            if (d[t.id] < d[n.id] + 1 && d[n.id] + 1 <= cap) { d[t.id] = d[n.id] + 1; changed = true; }
+        }));
+        if (!changed) break;
+    }
+    return d;
+}
+
+function layout(src) {
+    const G = src || state;
+    const d = depths(G), m = {};
+    G.nodes.forEach(n => m[n.id] = measure(n));
+
+    const lanes = G.lanes;
+    const slotOf = {}, slots = {};
+    lanes.forEach(l => slots[l.id] = 1);
+
+    const bucket = {};
+    order(G).forEach(n => {
+        const k = n.lane + ":" + d[n.id];
+        bucket[k] = bucket[k] || [];
+        slotOf[n.id] = bucket[k].length;
+        bucket[k].push(n.id);
+        slots[n.lane] = Math.max(slots[n.lane] || 1, bucket[k].length);
+    });
+
+    const laneX = {}, laneW = {};
+    let x = PAD;
+    lanes.forEach(l => {
+        laneW[l.id] = slots[l.id] * SLOTW + (slots[l.id] - 1) * SGAP;
+        laneX[l.id] = x;
+        x += laneW[l.id] + LGAP;
+    });
+    const totalW = Math.max(x - LGAP + PAD, 420);
+
+    const maxD = G.nodes.reduce((a, n) => Math.max(a, d[n.id]), 0);
+    const rowH = [], rowY = [];
+    for (let i = 0; i <= maxD; i++) {
+        rowH[i] = G.nodes.filter(n => d[n.id] === i).reduce((a, n) => Math.max(a, m[n.id].h), 54);
+        rowY[i] = i === 0 ? PAD + (lanes.length > 1 ? LANEH + 14 : 0) : rowY[i - 1] + rowH[i - 1] + VGAP;
+    }
+    const totalH = (rowY[maxD] || PAD) + (rowH[maxD] || 54) + PAD;
+
+    const boxes = {};
+    G.nodes.forEach(n => {
+        const s = m[n.id], slot = slotOf[n.id] || 0;
+        boxes[n.id] = {
+            x: laneX[n.lane] + slot * (SLOTW + SGAP) + (SLOTW - s.w) / 2 + n.pos.dx,
+            y: (rowY[d[n.id]] || PAD) + n.pos.dy,
+            w: s.w, h: s.h, lines: s.lines, diamond: s.diamond, node: n
+        };
+    });
+
+    return { boxes, laneX, laneW, totalW, totalH, top: PAD };
+}
+
+/* ============================================================
+   Canvas drawing
+   ============================================================ */
+function buildSvg(standalone, src, mark) {
+    const G = src || state;
+    const L = layout(G);
+    const svg = sv("svg");
+    svg.setAttribute("xmlns", NS);
+    svg.setAttribute("viewBox", `0 0 ${L.totalW} ${L.totalH}`);
+    svg.setAttribute("width", L.totalW);
+    svg.setAttribute("height", L.totalH);
+
+    const defs = sv("defs");
+    const mk = sv("marker");
+    mk.setAttribute("id", "arrow");
+    mk.setAttribute("viewBox", "0 0 10 10");
+    mk.setAttribute("refX", "9"); mk.setAttribute("refY", "5");
+    mk.setAttribute("markerWidth", "7"); mk.setAttribute("markerHeight", "7");
+    mk.setAttribute("orient", "auto-start-reverse");
+    const tip = sv("path");
+    tip.setAttribute("d", "M0,1 L10,5 L0,9 z");
+    tip.setAttribute("class", "arrowhead");
+    mk.appendChild(tip);
+    defs.appendChild(mk);
+    svg.appendChild(defs);
+
+    if (standalone) {
+        const st = sv("style");
+        st.textContent = exportCss();
+        svg.appendChild(st);
+    } else {
+        const st = sv("style");
+        st.textContent = ".arrowhead{fill:var(--fg-faint);stroke:none}";
+        svg.appendChild(st);
+    }
+
+    if (!G.nodes.length) {
+        const t = sv("text", "lane-name");
+        t.setAttribute("x", 20); t.setAttribute("y", 34);
+        t.textContent = "No steps yet";
+        svg.appendChild(t);
+        return { svg, L };
+    }
+
+    /* lane bands */
+    if (G.lanes.length > 1) {
+        G.lanes.forEach(l => {
+            const r = sv("rect", "lane-band");
+            r.setAttribute("x", L.laneX[l.id] - 12);
+            r.setAttribute("y", L.top);
+            r.setAttribute("width", L.laneW[l.id] + 24);
+            r.setAttribute("height", L.totalH - L.top - 10);
+            r.setAttribute("rx", 6);
+            svg.appendChild(r);
+            const t = sv("text", "lane-name");
+            t.setAttribute("x", L.laneX[l.id]);
+            t.setAttribute("y", L.top + 18);
+            t.textContent = (l.name || "lane").toUpperCase();
+            svg.appendChild(t);
+        });
+    }
+
+    /* edges */
+    const R = refs(G);
+    let chan = 0;
+    G.nodes.forEach(n => {
+        const a = L.boxes[n.id];
+        if (!a) return;
+        const cnt = n.outs.length;
+        n.outs.forEach((o, i) => {
+            const b = L.boxes[o.to];
+            if (!b) return;
+            const sx = a.x + a.w * (i + 1) / (cnt + 1);
+            const sy = a.y + a.h;
+            const tx = b.x + b.w / 2;
+            const ty = b.y;
+            const p = sv("path", "edge");
+            let d;
+            if (ty > sy + 8) {
+                if (Math.abs(tx - sx) < 3) d = `M${sx},${sy} L${tx},${ty - 2}`;
+                else {
+                    const my = sy + (ty - sy) / 2;
+                    d = `M${sx},${sy} L${sx},${my} L${tx},${my} L${tx},${ty - 2}`;
+                }
+            } else {
+                chan++;
+                const cx = Math.max(a.x + a.w, b.x + b.w) + 22 + chan * 12;
+                d = `M${sx},${sy} L${sx},${sy + 16} L${cx},${sy + 16} L${cx},${ty - 22} L${tx},${ty - 22} L${tx},${ty - 2}`;
+            }
+            p.setAttribute("d", d);
+            p.setAttribute("marker-end", "url(#arrow)");
+            svg.appendChild(p);
+
+            if (o.label) {
+                const t = sv("text", "elabel");
+                t.setAttribute("x", sx + 6);
+                t.setAttribute("y", sy + 15);
+                t.textContent = o.label;
+                svg.appendChild(t);
+            }
+        });
+    });
+
+    /* nodes */
+    order(G).forEach(n => {
+        const b = L.boxes[n.id];
+        if (!b) return;
+        let cls = "nd-box nd-" + n.type;
+        if (mark && mark.now && mark.now.indexOf(n.id) >= 0) cls += " nd-now";
+        else if (mark && mark.done && mark.done.indexOf(n.id) >= 0) cls += " nd-done";
+        const g = sv("g", cls);
+        g.dataset.id = n.id;
+
+        if (b.diamond) {
+            const p = sv("polygon");
+            p.setAttribute("points", [
+                [b.x + b.w / 2, b.y], [b.x + b.w, b.y + b.h / 2],
+                [b.x + b.w / 2, b.y + b.h], [b.x, b.y + b.h / 2]
+            ].map(q => q.join(",")).join(" "));
+            g.appendChild(p);
+        } else if (n.type === "parallel") {
+            const c = 14;
+            const p = sv("polygon");
+            p.setAttribute("points", [
+                [b.x + c, b.y], [b.x + b.w - c, b.y], [b.x + b.w, b.y + b.h / 2],
+                [b.x + b.w - c, b.y + b.h], [b.x + c, b.y + b.h], [b.x, b.y + b.h / 2]
+            ].map(q => q.join(",")).join(" "));
+            g.appendChild(p);
+        } else {
+            const r = sv("rect");
+            r.setAttribute("x", b.x); r.setAttribute("y", b.y);
+            r.setAttribute("width", b.w); r.setAttribute("height", b.h);
+            r.setAttribute("rx", (n.type === "start" || n.type === "end") ? b.h / 2 : 7);
+            g.appendChild(r);
+        }
+
+        const kind = sv("text", "nd-kind");
+        kind.setAttribute("x", b.x + b.w / 2);
+        kind.setAttribute("y", b.y + (b.diamond ? 26 : 17));
+        kind.setAttribute("text-anchor", "middle");
+        kind.textContent = n.type.toUpperCase();
+        g.appendChild(kind);
+
+        const rf = sv("text", "nd-ref");
+        rf.setAttribute("x", b.x + b.w / 2);
+        rf.setAttribute("y", b.y + b.h - (b.diamond ? 20 : 9));
+        rf.setAttribute("text-anchor", "middle");
+        rf.textContent = "#" + R[n.id];
+        g.appendChild(rf);
+
+        const startY = b.y + b.h / 2 - ((b.lines.length - 1) * 17) / 2 + 4;
+        b.lines.forEach((ln, i) => {
+            const t = sv("text");
+            t.setAttribute("x", b.x + b.w / 2);
+            t.setAttribute("y", startY + i * 17);
+            t.setAttribute("text-anchor", "middle");
+            t.textContent = ln;
+            g.appendChild(t);
+        });
+
+        svg.appendChild(g);
+    });
+
+    return { svg, L };
+}
+
+function exportCss() {
+    return [
+        ".nd-box rect,.nd-box polygon{stroke-width:1.4}",
+        ".nd-action rect{fill:#fff;stroke:#555}",
+        ".nd-start rect,.nd-end rect{fill:#eef4fb;stroke:#0b4f8a}",
+        ".nd-decision polygon{fill:#fff;stroke:#b45309}",
+        ".nd-parallel polygon{fill:#fff;stroke:#0f766e}",
+        ".nd-box text{fill:#111;font-family:monospace;font-size:12px}",
+        ".nd-box .nd-kind{fill:#888;font-size:9.5px;letter-spacing:.08em}",
+        ".nd-box .nd-ref{fill:#666;font-size:9.5px}",
+        ".edge{fill:none;stroke:#666;stroke-width:1.4}",
+        ".arrowhead{fill:#666;stroke:none}",
+        ".elabel{fill:#444;font-family:monospace;font-size:10.5px;paint-order:stroke;stroke:#fff;stroke-width:3px}",
+        ".lane-band{fill:none;stroke:#bbb;stroke-dasharray:4 4}",
+        ".lane-name{fill:#666;font-family:monospace;font-size:10.5px;letter-spacing:.08em}",
+        "svg{background:#fff}"
+    ].join("");
+}
+
+let currentL = null;
+function drawCanvas() {
+    const host = $("#canvasWrap");
+    const built = buildSvg(false);
+    currentL = built.L;
+    const z = state.zoom;
+    built.svg.setAttribute("width", Math.round(built.L.totalW * z));
+    built.svg.setAttribute("height", Math.round(built.L.totalH * z));
+    host.textContent = "";
+    host.appendChild(built.svg);
+    $("#zoomLabel").textContent = Math.round(z * 100) + "%";
+    wireDrag(built.svg);
+}
+
+function wireDrag(svg) {
+    let drag = null;
+    svg.addEventListener("pointerdown", e => {
+        const g = e.target.closest(".nd-box");
+        if (!g) return;
+        const n = byId(g.dataset.id);
+        if (!n) return;
+        drag = { n, x: e.clientX, y: e.clientY, dx: n.pos.dx, dy: n.pos.dy, g };
+        g.classList.add("dragging");
+        svg.setPointerCapture(e.pointerId);
+        e.preventDefault();
+    });
+    svg.addEventListener("pointermove", e => {
+        if (!drag) return;
+        const z = state.zoom || 1;
+        drag.n.pos.dx = Math.round(drag.dx + (e.clientX - drag.x) / z);
+        drag.n.pos.dy = Math.round(drag.dy + (e.clientY - drag.y) / z);
+        drawCanvas();
+        e.preventDefault();
+    });
+    const stop = () => {
+        if (!drag) return;
+        drag.g.classList.remove("dragging");
+        drag = null;
+        persist();
+    };
+    svg.addEventListener("pointerup", stop);
+    svg.addEventListener("pointercancel", stop);
+}
+
+/* ============================================================
+   Builder outline
+   ============================================================ */
+function drawLanes() {
+    const host = $("#lanes");
+    host.textContent = "";
+    state.lanes.forEach((l, i) => {
+        const row = el("div", "row");
+        row.style.marginBottom = "8px";
+
+        const inp = el("input", "field");
+        inp.type = "text";
+        inp.value = l.name;
+        inp.placeholder = "Lane name";
+        inp.style.flex = "1 1 200px";
+        inp.style.width = "auto";
+        inp.addEventListener("input", () => { l.name = inp.value; persist(); drawCanvas(); });
+        row.appendChild(inp);
+
+        const mk = (txt, title, fn, cls) => {
+            const b = el("button", "btn btn-sm noprint" + (cls ? " " + cls : ""), txt);
+            b.title = title;
+            b.addEventListener("click", fn);
+            row.appendChild(b);
+        };
+        mk("^", "Move left", () => {
+            if (i === 0) return;
+            state.lanes.splice(i - 1, 0, state.lanes.splice(i, 1)[0]);
+            persist(); drawLanes(); drawCanvas();
+        });
+        mk("v", "Move right", () => {
+            if (i === state.lanes.length - 1) return;
+            state.lanes.splice(i + 1, 0, state.lanes.splice(i, 1)[0]);
+            persist(); drawLanes(); drawCanvas();
+        });
+        mk("x", "Remove lane", () => {
+            if (state.lanes.length === 1) { notify("Keep at least one lane", true); return; }
+            const used = state.nodes.filter(n => n.lane === l.id).length;
+            if (used && !confirm(`${used} step(s) are in this lane. Move them to "${state.lanes.find(x => x.id !== l.id).name}"?`)) return;
+            const fallback = state.lanes.find(x => x.id !== l.id).id;
+            state.nodes.forEach(n => { if (n.lane === l.id) n.lane = fallback; });
+            state.lanes = state.lanes.filter(x => x.id !== l.id);
+            persist(); drawLanes(); drawSteps(); drawCanvas();
+        }, "btn-danger");
+
+        host.appendChild(row);
+    });
+}
+
+function targetSelect(node, out) {
+    const sel = el("select", "field");
+    const R = refs();
+    const blank = el("option", null, "(not set)");
+    blank.value = "";
+    sel.appendChild(blank);
+    order().forEach(n => {
+        if (n.id === node.id) return;
+        const o = el("option", null, `#${R[n.id]} ${n.label || "(unnamed)"} [${n.type}]`);
+        o.value = n.id;
+        sel.appendChild(o);
+    });
+    const nw = el("option", null, "+ new step");
+    nw.value = "__new";
+    sel.appendChild(nw);
+    sel.value = byId(out.to) ? out.to : "";
+    sel.addEventListener("change", () => {
+        if (sel.value === "__new") {
+            const n = addNode({ lane: node.lane });
+            out.to = n.id;
+        } else {
+            out.to = sel.value;
+        }
+        persist(); drawSteps(); drawCanvas();
+    });
+    return sel;
+}
+
+function drawSteps() {
+    const host = $("#steps");
+    host.textContent = "";
+    const list = order(), R = refs();
+
+    $("#starterPanel").hidden = state.nodes.length > 0;
+    $("#lanesPanel").hidden = false;
+
+    if (!list.length) {
+        host.appendChild(el("div", "empty", "No steps yet. Use Create first step above."));
+        drawStat();
+        return;
+    }
+
+    list.forEach(n => {
+        const card = el("div", "step t-" + n.type);
+
+        const head = el("div", "step-head");
+        head.appendChild(el("div", "ref", "#" + R[n.id]));
+
+        const tsel = el("select", "field noprint");
+        TYPES.forEach(t => { const o = el("option", null, t); o.value = t; tsel.appendChild(o); });
+        tsel.value = n.type;
+        tsel.addEventListener("change", () => {
+            n.type = tsel.value;
+            defaultOuts(n);
+            persist(); drawSteps(); drawCanvas();
+        });
+        head.appendChild(tsel);
+
+        const lsel = el("select", "field noprint");
+        state.lanes.forEach(l => { const o = el("option", null, l.name || "lane"); o.value = l.id; lsel.appendChild(o); });
+        lsel.value = n.lane;
+        lsel.addEventListener("change", () => { n.lane = lsel.value; persist(); drawCanvas(); });
+        head.appendChild(lsel);
+
+        head.appendChild(el("div", "spacer"));
+
+        const del = el("button", "btn btn-sm btn-danger noprint", "x");
+        del.title = "Remove step";
+        del.addEventListener("click", () => {
+            if (!confirm("Remove this step?")) return;
+            removeNode(n);
+            persist(); drawSteps(); drawCanvas();
+        });
+        head.appendChild(del);
+        card.appendChild(head);
+
+        const lab = el("input", "field step-label");
+        lab.type = "text";
+        lab.value = n.label;
+        lab.placeholder = n.type === "decision" ? "Did the user click the link?" : "What happens at this step";
+        lab.addEventListener("input", () => { n.label = lab.value; persist(); drawCanvas(); });
+        card.appendChild(lab);
+
+        if (n.type !== "end") {
+            const outs = el("div", "outs");
+            n.outs.forEach((o, i) => {
+                const row = el("div", "out-row");
+                if (n.type === "decision" || n.type === "parallel") {
+                    const oi = el("input", "field");
+                    oi.type = "text";
+                    oi.value = o.label;
+                    oi.placeholder = n.type === "decision" ? (i === 0 ? "Yes" : "No") : "Branch name";
+                    oi.addEventListener("input", () => { o.label = oi.value; persist(); drawCanvas(); });
+                    row.appendChild(oi);
+                }
+                row.appendChild(el("span", "arrow", "->"));
+                row.appendChild(targetSelect(n, o));
+
+                const x = el("button", "btn btn-sm btn-danger noprint", "x");
+                x.title = "Remove branch";
+                x.addEventListener("click", () => {
+                    n.outs.splice(i, 1);
+                    persist(); drawSteps(); drawCanvas();
+                });
+                row.appendChild(x);
+                outs.appendChild(row);
+            });
+
+            const acts = el("div", "row noprint");
+            const single = n.type === "action" || n.type === "start";
+            if (!single || !n.outs.length) {
+                const add = el("button", "btn btn-sm", single ? "Add next step" : "Add branch");
+                add.addEventListener("click", () => {
+                    addAfter(n, single ? "" : (n.type === "decision" ? (n.outs.length ? "No" : "Yes") : "Branch " + (n.outs.length + 1)));
+                    persist(); drawSteps(); drawCanvas();
+                });
+                acts.appendChild(add);
+            }
+            if (n.outs.length === 1 && single) {
+                const end = el("button", "btn btn-sm", "Insert step after");
+                end.addEventListener("click", () => {
+                    const nx = n.outs[0].to;
+                    const mid = addNode({ lane: n.lane });
+                    mid.outs.push({ label: "", to: nx });
+                    n.outs[0].to = mid.id;
+                    persist(); drawSteps(); drawCanvas();
+                });
+                acts.appendChild(end);
+            }
+            if (acts.childElementCount) outs.appendChild(acts);
+            card.appendChild(outs);
+        }
+
+        host.appendChild(card);
+    });
+
+    drawStat();
+}
+
+function drawStat() {
+    const s = $("#stat");
+    s.textContent = "";
+    const put = (cls, txt) => s.appendChild(el("span", cls, txt));
+    const dangling = state.nodes.reduce((a, n) => a + n.outs.filter(o => !byId(o.to)).length, 0);
+    const ends = state.nodes.filter(n => n.type === "end").length;
+    put("a", String(state.nodes.length)); put(null, " steps, ");
+    put("a", String(state.lanes.length)); put(null, " lanes, ");
+    put(ends ? "ok" : "warn", String(ends)); put(null, " end points, ");
+    put(dangling ? "bad" : "ok", String(dangling)); put(null, " unlinked branches");
+    $("#promptState").textContent = state.meta.title || "untitled process";
+}
+
+/* ============================================================
+   Runbook
+   ============================================================ */
+function drawRunbook() {
+    const host = $("#runbook");
+    host.textContent = "";
+    const list = order(), R = refs();
+
+    if (!list.length) {
+        host.appendChild(el("div", "empty", "No steps yet. Build the flow on the build tab."));
+        return;
+    }
+
+    list.forEach(n => {
+        const card = el("div", "step t-" + n.type);
+
+        const head = el("div", "step-head");
+        head.appendChild(el("div", "ref", "#" + R[n.id]));
+        head.appendChild(el("div", "log", n.type + " / " + (laneById(n.lane).name || "lane")));
+        card.appendChild(head);
+
+        const lab = el("input", "field step-label");
+        lab.type = "text";
+        lab.value = n.label;
+        lab.placeholder = "Step title";
+        lab.addEventListener("input", () => { n.label = lab.value; persist(); markStale(); });
+        card.appendChild(lab);
+
+        const g = el("div", "grid");
+        g.style.marginTop = "10px";
+        const mkf = (title, key, ph) => {
+            const l = el("label", "f", null);
+            l.appendChild(document.createTextNode(title));
+            const i = el("input", "field");
+            i.type = "text";
+            i.value = n[key] || "";
+            i.placeholder = ph;
+            i.addEventListener("input", () => { n[key] = i.value; persist(); });
+            l.appendChild(i);
+            g.appendChild(l);
+        };
+        mkf("Owner", "owner", "Role or team");
+        mkf("Evidence", "evidence", "What to capture");
+        card.appendChild(g);
+
+        const dl = el("label", "f");
+        dl.style.marginTop = "10px";
+        dl.appendChild(document.createTextNode("Detail"));
+        const ta = el("textarea", "field");
+        ta.rows = 3;
+        ta.value = n.detail || "";
+        ta.placeholder = "How to do it: tools, queries, thresholds, who to tell";
+        ta.addEventListener("input", () => { n.detail = ta.value; persist(); });
+        dl.appendChild(ta);
+        card.appendChild(dl);
+
+        if (n.outs.length) {
+            const outs = el("div", "outs");
+            outs.appendChild(el("div", "note", n.type === "decision" ? "Outcomes" : (n.type === "parallel" ? "Runs in parallel" : "Next")));
+            n.outs.forEach((o, i) => {
+                const row = el("div", "out-row");
+                const t = byId(o.to);
+                if (n.type === "decision" || n.type === "parallel") {
+                    const oi = el("input", "field");
+                    oi.type = "text";
+                    oi.value = o.label;
+                    oi.placeholder = i === 0 ? "Yes" : "No";
+                    oi.addEventListener("input", () => { o.label = oi.value; persist(); markStale(); });
+                    row.appendChild(oi);
+                }
+                row.appendChild(el("span", "arrow", "->"));
+                row.appendChild(el("div", "log", t ? `#${R[t.id]} ${t.label || "(unnamed)"}` : "not linked"));
+                outs.appendChild(row);
+            });
+            card.appendChild(outs);
+        }
+
+        host.appendChild(card);
+    });
+}
+
+let staleT;
+function markStale() {
+    clearTimeout(staleT);
+    staleT = setTimeout(() => { drawCanvas(); drawStat(); }, 250);
+}
+
+/* ============================================================
+   Save / load / export
+   ============================================================ */
+function saveJson() {
+    const out = JSON.parse(JSON.stringify(state));
+    out.exported = new Date().toISOString();
+    out.version = APP.version;
+    download(fname("json"), JSON.stringify(out, null, 2), "application/json");
+    notify("Config saved");
+}
+function loadJson(text) {
+    let d;
+    try { d = JSON.parse(text); }
+    catch (e) { notify("That file is not valid JSON", true); return; }
+    if (!d || typeof d !== "object") { notify("That file is not a saved " + APP.id + " config", true); return; }
+    if (d.app && d.app !== APP.id &&
+        !confirm(`That file was saved by "${d.app}", not ${APP.id}. Load it anyway?`)) return;
+    if (d.schema > APP.schema &&
+        !confirm("That file was saved by a newer version of this tool. Some fields may be dropped. Continue?")) return;
+    state = normalise(d);
+    render();
+    notify("Config loaded");
+}
+function reset() {
+    if (!confirm("Clear everything and start again?")) return;
+    state = blankState();
+    store.del("state");
+    render();
+    notify("Cleared");
+}
+
+function svgText() {
+    const built = buildSvg(true);
+    built.svg.removeAttribute("style");
+    return '<?xml version="1.0" encoding="UTF-8"?>\n' + new XMLSerializer().serializeToString(built.svg);
+}
+function exportSvg() {
+    if (!state.nodes.length) { notify("Nothing to export", true); return; }
+    download(fname("svg"), svgText(), "image/svg+xml;charset=utf-8");
+    notify("SVG exported");
+}
+function exportPng() {
+    if (!state.nodes.length) { notify("Nothing to export", true); return; }
+    const built = buildSvg(true);
+    const w = +built.svg.getAttribute("width"), h = +built.svg.getAttribute("height");
+    const scale = 2;
+    const url = "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svgText());
+    const img = new Image();
+    img.onload = () => {
+        const c = document.createElement("canvas");
+        c.width = w * scale; c.height = h * scale;
+        const ctx = c.getContext("2d");
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, c.width, c.height);
+        ctx.drawImage(img, 0, 0, c.width, c.height);
+        c.toBlob(blob => {
+            if (!blob) { notify("PNG export failed, use SVG", true); return; }
+            const a = document.createElement("a");
+            a.href = URL.createObjectURL(blob);
+            a.download = fname("png");
+            a.click();
+            setTimeout(() => { try { URL.revokeObjectURL(a.href); } catch (e) {} }, 1000);
+            notify("PNG exported");
+        }, "image/png");
+    };
+    img.onerror = () => notify("PNG export failed, use SVG", true);
+    img.src = url;
+}
+
+/* ---------- markdown ---------- */
+function exportMd() {
+    if (!state.nodes.length) { notify("Nothing to export", true); return; }
+    const R = refs(), L = [];
+    const m = state.meta;
+    L.push("# " + (m.title || "Untitled process"), "");
+    const hdr = [];
+    if (m.team)   hdr.push("- Owner team: " + m.team);
+    if (m.author) hdr.push("- Author: " + m.author);
+    if (m.date)   hdr.push("- Date: " + m.date);
+    if (m.sev)    hdr.push("- Severity / scope: " + m.sev);
+    if (hdr.length) L.push(hdr.join("\n"), "");
+    if (m.purpose) L.push("## Purpose", "", m.purpose, "");
+
+    if (state.lanes.length > 1) {
+        L.push("## Swimlanes", "");
+        state.lanes.forEach(l => {
+            const c = state.nodes.filter(n => n.lane === l.id).length;
+            L.push(`- ${l.name || "lane"} (${c} step${c === 1 ? "" : "s"})`);
+        });
+        L.push("");
+    }
+
+    L.push("## Steps", "");
+    order().forEach(n => {
+        L.push(`### ${R[n.id]}. ${n.label || "(unnamed)"}`, "");
+        const meta = [`type: ${n.type}`, `lane: ${laneById(n.lane).name || "lane"}`];
+        if (n.owner) meta.push(`owner: ${n.owner}`);
+        L.push("`" + meta.join("  |  ") + "`", "");
+        if (n.detail) L.push(n.detail, "");
+        if (n.evidence) L.push("Evidence: " + n.evidence, "");
+        if (n.outs.length) {
+            const head = n.type === "decision" ? "Outcomes:" : (n.type === "parallel" ? "Runs in parallel:" : "Next:");
+            L.push(head);
+            n.outs.forEach(o => {
+                const t = byId(o.to);
+                const tgt = t ? `${R[t.id]}. ${t.label || "(unnamed)"}` : "not linked";
+                L.push(o.label ? `- ${o.label} -> ${tgt}` : `- ${tgt}`);
+            });
+            L.push("");
+        }
+        if (n.type === "end") L.push("Path ends here.", "");
+    });
+
+    L.push("---", "", `Generated by ${APP.id} v${APP.version} on ${today()}.`, "");
+    download(fname("md"), L.join("\n"), "text/markdown;charset=utf-8");
+    notify("Markdown exported");
+}
+
+/* ---------- example ---------- */
+
+function loadExample() {
+    if (state.nodes.length && !confirm("Replace the current flow with the demo?")) return;
+    const L1 = "lane1", L2 = "lane2";
+    const mk = (id, type, label, lane, outs, detail) =>
+        ({ id, type, label, lane, owner: "", detail: detail || "", evidence: "", outs: outs || [], pos: { dx: 0, dy: 0 } });
+
+    state = normalise({
+        app: APP.id, schema: APP.schema,
+        meta: {
+            title: "Phishing email reported", author: state.meta.author, date: today(),
+            team: "SecOps", sev: "Sev 3 unless credentials confirmed compromised",
+            purpose: "Triage a user-reported phishing email, contain any credential compromise, and clear the message from the estate."
+        },
+        lanes: [{ id: L1, name: "User impact" }, { id: L2, name: "Blast radius" }],
+        nodes: [
+            mk("n1", "start", "Phishing email reported", L1, [{ label: "", to: "n2" }]),
+            mk("n2", "parallel", "Open case and split the work", L1,
+                [{ label: "Check the user", to: "n3" }, { label: "Check the estate", to: "b1" }],
+                "Raise the ticket, record reporter, subject, sender and received time. Both branches run at once."),
+            mk("n3", "decision", "Did the user click the link?", L1,
+                [{ label: "Yes", to: "n4" }, { label: "No", to: "n8" }],
+                "Ask directly, then verify against web filter logs rather than taking the answer at face value."),
+            mk("n4", "action", "Check web filter logs for the URL", L1, [{ label: "", to: "n5" }],
+                "Search the proxy or DNS filter for the domain. Note whether the request was blocked or allowed and the exact time."),
+            mk("n5", "decision", "Credentials entered?", L1,
+                [{ label: "Yes", to: "n6" }, { label: "No", to: "n8" }],
+                "Look for a POST to the landing page and ask the user what they typed."),
+            mk("n6", "action", "Reset password and revoke sessions", L1, [{ label: "", to: "n7" }],
+                "Force password reset, revoke refresh tokens, re-register MFA if the prompt was approved."),
+            mk("n7", "action", "Review sign-in logs and mailbox rules", L1, [{ label: "", to: "n8" }],
+                "Entra sign-in logs for the user, 24h either side. Check for new inbox rules, forwarding and app consents."),
+            mk("n8", "end", "User impact closed", L1, []),
+            mk("b1", "action", "Search the estate for the same message", L2, [{ label: "", to: "b2" }],
+                "Content search on sender, subject and URL across all mailboxes."),
+            mk("b2", "decision", "Did anyone else receive it?", L2,
+                [{ label: "Yes", to: "b3" }, { label: "No", to: "b5" }]),
+            mk("b3", "action", "Purge the message from all mailboxes", L2, [{ label: "", to: "b4" }],
+                "Soft delete the search results, then confirm the purge completed and record the count."),
+            mk("b4", "action", "Check logs for other recipients", L2, [{ label: "", to: "b5" }],
+                "Repeat the filter and sign-in checks for anyone who interacted with the message."),
+            mk("b5", "action", "Block sender and URL, notify users", L2, [{ label: "", to: "b6" }],
+                "Add sender and domain to the block list, brief the affected users, feed the indicators to detections."),
+            mk("b6", "end", "Blast radius closed", L2, [])
+        ],
+        zoom: state.zoom
+    });
+    render();
+    notify("Example loaded");
+}
+
+/* ============================================================
+   Render and wiring
+   ============================================================ */
+function render() {
+    $("#mTitle").value   = state.meta.title   || "";
+    $("#mAuthor").value  = state.meta.author  || "";
+    $("#mDate").value    = state.meta.date    || today();
+    $("#mTeam").value    = state.meta.team    || "";
+    $("#mSev").value     = state.meta.sev     || "";
+    $("#mPurpose").value = state.meta.purpose || "";
+    drawLanes();
+    drawSteps();
+    drawCanvas();
+    drawRunbook();
+    persist();
+}
+
+[["#mTitle", "title"], ["#mAuthor", "author"], ["#mDate", "date"],
+ ["#mTeam", "team"], ["#mSev", "sev"], ["#mPurpose", "purpose"]].forEach(([sel, key]) => {
+    $(sel).addEventListener("input", e => {
+        state.meta[key] = e.target.value;
+        persist();
+        if (key === "title") drawStat();
+    });
+});
+
+$("#btnSave").addEventListener("click", saveJson);
+$("#btnLoad").addEventListener("click", () => $("#fileIn").click());
+$("#fileIn").addEventListener("change", e => {
+    if (e.target.files[0]) read(e.target.files[0], loadJson);
+    e.target.value = "";
+});
+$("#btnSvg").addEventListener("click", exportSvg);
+$("#btnPng").addEventListener("click", exportPng);
+$("#btnPrint").addEventListener("click", () => window.print());
+$("#btnReset").addEventListener("click", reset);
+
+$("#btnStarter").addEventListener("click", () => {
+    const s = addNode({ type: "start", label: state.meta.title || "Process starts" });
+    const a = addAfter(s, "");
+    a.label = "";
+    const e = addNode({ type: "end", label: "Process complete", lane: s.lane });
+    a.outs.push({ label: "", to: e.id });
+    persist();
+    drawSteps(); drawCanvas(); drawRunbook();
+    notify("First steps created");
+});
+$("#btnExample").addEventListener("click", loadExample);
+$("#btnMd").addEventListener("click", exportMd);
+$("#btnPrint2").addEventListener("click", () => window.print());
+$("#btnLane").addEventListener("click", () => {
+    state.lanes.push({ id: uid(), name: "Lane " + (state.lanes.length + 1) });
+    persist(); drawLanes(); drawSteps(); drawCanvas();
+});
+$("#btnAddLoose").addEventListener("click", () => {
+    addNode({});
+    persist(); drawSteps(); drawCanvas();
+});
+
+const setZoom = z => {
+    state.zoom = Math.min(2, Math.max(0.3, Math.round(z * 100) / 100));
+    persist(); drawCanvas();
+};
+$("#btnZoomIn").addEventListener("click", () => setZoom(state.zoom + 0.1));
+$("#btnZoomOut").addEventListener("click", () => setZoom(state.zoom - 0.1));
+$("#btnFit").addEventListener("click", () => {
+    if (!currentL) return;
+    const w = $("#canvasWrap").clientWidth - 4;
+    if (w < 80) return;
+    setZoom(Math.min(1.4, w / currentL.totalW));
+});
+$("#btnNudgeReset").addEventListener("click", () => {
+    state.nodes.forEach(n => n.pos = { dx: 0, dy: 0 });
+    persist(); drawCanvas();
+    notify("Layout reset");
+});
+
+$("#btnBig").addEventListener("click", () => {
+    if (!state.nodes.length) { notify("Nothing to preview", true); return; }
+    const host = $("#bigHost");
+    const built = buildSvg(false);
+    built.svg.removeAttribute("width");
+    built.svg.removeAttribute("height");
+    host.textContent = "";
+    host.appendChild(built.svg);
+    $("#bigTitle").textContent = state.meta.title || "untitled process";
+    $("#overlay").classList.add("show");
+});
+const closeBig = () => $("#overlay").classList.remove("show");
+$("#btnBigClose").addEventListener("click", closeBig);
+$("#overlay").addEventListener("click", e => { if (e.target === $("#overlay")) closeBig(); });
+document.addEventListener("keydown", e => {
+    if (e.key === "Escape") closeBig();
+    if (!(e.ctrlKey || e.metaKey)) return;
+    const k = e.key.toLowerCase();
+    if (k === "s") { e.preventDefault(); saveJson(); }
+    if (k === "o") { e.preventDefault(); $("#fileIn").click(); }
+});
+
+/* ============================================================
+   Run tab: library, runs, and the guided walk-through
+   ============================================================ */
+let lib = [], runs = [], active = null;
+const drafts = {};
+
+function loadRunData() {
+    try { lib = JSON.parse(store.get("library") || "[]"); } catch (e) { lib = []; }
+    try { runs = JSON.parse(store.get("runs") || "[]"); } catch (e) { runs = []; }
+    if (!Array.isArray(lib)) lib = [];
+    if (!Array.isArray(runs)) runs = [];
+    runs.forEach(r => {
+        r.open = Array.isArray(r.open) ? r.open : [];
+        r.done = Array.isArray(r.done) ? r.done : [];
+        r.entries = Array.isArray(r.entries) ? r.entries : [];
+    });
+    const openId = store.get("active");
+    active = runs.find(r => r.id === openId) || null;
+}
+function saveLib()  { store.set("library", JSON.stringify(lib)); }
+function saveRuns() {
+    store.set("runs", JSON.stringify(runs));
+    store.set("active", active ? active.id : "");
+}
+
+/* ---------- time helpers ---------- */
+const clock = iso => {
+    const d = new Date(iso);
+    return isNaN(d) ? "--:--:--" : d.toTimeString().slice(0, 8);
+};
+const stamp = iso => {
+    const d = new Date(iso);
+    return isNaN(d) ? "unknown" : d.toISOString().slice(0, 16).replace("T", " ") + "Z";
+};
+function elapsed(from, to) {
+    const ms = (to ? new Date(to) : new Date()) - new Date(from);
+    if (isNaN(ms) || ms < 0) return "unknown";
+    const m = Math.floor(ms / 60000), h = Math.floor(m / 60);
+    return h ? `${h}h ${m % 60}m` : `${m}m`;
+}
+
+/* ---------- import ---------- */
+function addToLib(g, fallbackName) {
+    if (!g.nodes.length) { notify("That config has no steps", true); return; }
+    const entry = {
+        id: uid(),
+        title: g.meta.title || fallbackName || "Untitled process",
+        author: g.meta.author || "",
+        date: g.meta.date || today(),
+        added: new Date().toISOString(),
+        config: { meta: g.meta, lanes: g.lanes, nodes: g.nodes }
+    };
+    const dup = lib.find(x => x.title === entry.title);
+    if (dup) {
+        if (!confirm(`"${entry.title}" is already in the list. Replace it?`)) return;
+        lib = lib.filter(x => x !== dup);
+    }
+    lib.unshift(entry);
+    saveLib();
+    drawRunTab();
+    notify("Process imported");
+}
+function importConfig(text, file) {
+    let d;
+    try { d = JSON.parse(text); }
+    catch (e) { notify("That file is not valid JSON", true); return; }
+    if (!d || typeof d !== "object") { notify("That file is not a config", true); return; }
+    if (d.app && d.app !== APP.id &&
+        !confirm(`That file was saved by "${d.app}", not ${APP.id}. Import it anyway?`)) return;
+    const g = normalise(d);
+    addToLib(g, file ? file.name.replace(/\.json$/i, "") : "");
+}
+
+/* ---------- runs ---------- */
+function logEntry(run, e) {
+    run.entries.push(Object.assign({ t: new Date().toISOString() }, e));
+}
+function startRun(entry) {
+    const g = JSON.parse(JSON.stringify(entry.config));
+    const starts = g.nodes.filter(n => n.type === "start").map(n => n.id);
+    const first = order(g)[0];
+    const run = {
+        id: uid(),
+        procId: entry.id,
+        title: entry.title,
+        operator: store.get("operator") || "",
+        ref: "",
+        started: new Date().toISOString(),
+        finished: null,
+        config: g,
+        open: starts.length ? starts : (first ? [first.id] : []),
+        done: [],
+        entries: []
+    };
+    logEntry(run, { kind: "start", text: "Run started: " + entry.title });
+    runs.unshift(run);
+    active = run;
+    saveRuns();
+    drawRunTab();
+    notify("Run started");
+}
+function openRun(run) { active = run; saveRuns(); drawRunTab(); }
+
+function reopenTo(ids) {
+    ids.forEach(id => {
+        if (!byId(id, active.config)) return;
+        active.done = active.done.filter(x => x !== id);
+        if (active.open.indexOf(id) < 0) active.open.push(id);
+    });
+}
+function closeNode(node) {
+    active.open = active.open.filter(id => id !== node.id);
+    if (active.done.indexOf(node.id) < 0) active.done.push(node.id);
+}
+function afterAction() {
+    saveRuns();
+    drawRunTab();
+    if (!active.open.length && !active.finished) notify("All paths closed, finish the run when ready");
+}
+
+function takeStep(node, out, skip) {
+    const R = refs(active.config);
+    const note = (drafts[node.id] || "").trim();
+    let text, kind = "step";
+    if (skip) {
+        kind = "skip";
+        text = "Skipped: " + (node.label || "(unnamed)") + (node.outs.length ? " (path stopped)" : "");
+    } else if (node.type === "end") {
+        text = "Path closed: " + (node.label || "(unnamed)");
+    } else if (node.type === "parallel") {
+        text = (node.label || "(unnamed)") + " -> started " + node.outs.length + " branches";
+    } else if (out && out.label) {
+        kind = "choice";
+        text = (node.label || "(unnamed)") + " -> " + out.label;
+    } else {
+        text = "Done: " + (node.label || "(unnamed)");
+    }
+    logEntry(active, { kind, nodeId: node.id, ref: R[node.id], type: node.type, text, note });
+    delete drafts[node.id];
+    closeNode(node);
+    if (!skip) {
+        if (node.type === "parallel") reopenTo(node.outs.map(o => o.to));
+        else if (out) reopenTo([out.to]);
+    }
+    afterAction();
+}
+
+function finishRun() {
+    if (!active) return;
+    if (active.open.length &&
+        !confirm(`${active.open.length} step(s) are still open. Finish the run anyway?`)) return;
+    if (active.open.length) {
+        const R = refs(active.config);
+        active.open.forEach(id => {
+            const n = byId(id, active.config);
+            if (n) logEntry(active, { kind: "left", nodeId: id, ref: R[id], type: n.type, text: "Left open at finish: " + (n.label || "(unnamed)") });
+        });
+        active.open = [];
+    }
+    active.finished = new Date().toISOString();
+    logEntry(active, { kind: "finish", text: "Run finished after " + elapsed(active.started, active.finished) });
+    saveRuns();
+    drawRunTab();
+    notify("Run finished");
+}
+
+/* ---------- library and run lists ---------- */
+function drawLib() {
+    const host = $("#libList");
+    host.textContent = "";
+    if (!lib.length) {
+        host.appendChild(el("div", "empty", "No processes imported yet."));
+        return;
+    }
+    lib.forEach(e => {
+        const row = el("div", "lib-row");
+        row.appendChild(el("div", "nm", e.title));
+        row.appendChild(el("span", "badge", e.config.nodes.length + " steps"));
+        row.appendChild(el("span", "badge", e.date || ""));
+        const go = el("button", "btn btn-sm btn-primary", "Start run");
+        go.addEventListener("click", () => startRun(e));
+        row.appendChild(go);
+        const x = el("button", "btn btn-sm btn-danger", "x");
+        x.title = "Remove from list";
+        x.addEventListener("click", () => {
+            if (!confirm(`Remove "${e.title}" from the list? Runs already recorded are kept.`)) return;
+            lib = lib.filter(y => y.id !== e.id);
+            saveLib();
+            drawRunTab();
+        });
+        row.appendChild(x);
+        host.appendChild(row);
+    });
+}
+
+function drawRunsList() {
+    const host = $("#runsList");
+    host.textContent = "";
+    if (!runs.length) {
+        host.appendChild(el("div", "empty", "No runs yet. Start one from the list above."));
+        return;
+    }
+    runs.forEach(r => {
+        const row = el("div", "lib-row");
+        row.appendChild(el("div", "nm", r.title + (r.ref ? "  [" + r.ref + "]" : "")));
+        row.appendChild(el("span", "badge " + (r.finished ? "shut" : "live"), r.finished ? "closed" : "live"));
+        row.appendChild(el("span", "badge", stamp(r.started)));
+        row.appendChild(el("span", "badge", r.done.length + "/" + r.config.nodes.length));
+        const go = el("button", "btn btn-sm" + (active && active.id === r.id ? "" : " btn-primary"),
+            active && active.id === r.id ? "Open" : (r.finished ? "View" : "Resume"));
+        go.addEventListener("click", () => openRun(r));
+        row.appendChild(go);
+        const x = el("button", "btn btn-sm btn-danger", "x");
+        x.title = "Delete run record";
+        x.addEventListener("click", () => {
+            if (!confirm("Delete this run record? The timeline goes with it.")) return;
+            runs = runs.filter(y => y.id !== r.id);
+            if (active && active.id === r.id) active = null;
+            saveRuns();
+            drawRunTab();
+        });
+        row.appendChild(x);
+        host.appendChild(row);
+    });
+}
+
+/* ---------- the active run ---------- */
+function drawRunTab() {
+    drawLib();
+    drawRunsList();
+    const on = !!active;
+    ["#runHeadPanel", "#runNowPanel", "#runTlPanel"].forEach(id => $(id).hidden = !on);
+    ["#runFlowPanel", "#runOffPanel"].forEach(id => $(id).hidden = !on || !!active.finished);
+    if (!on) return;
+
+    $("#runTitle").textContent = active.title;
+    $("#rOperator").value = active.operator || "";
+    $("#rRef").value = active.ref || "";
+    $("#rOperator").disabled = !!active.finished;
+    $("#rRef").disabled = !!active.finished;
+    updateRunMeta();
+    drawRunNow();
+    drawRunFlow();
+    drawTimeline();
+}
+
+function updateRunMeta() {
+    if (!active) return;
+    const m = $("#runMeta");
+    m.textContent = "";
+    const put = (cls, txt) => m.appendChild(el("span", cls, txt));
+    put(null, "started " + stamp(active.started) + ", ");
+    if (active.finished) {
+        put(null, "finished " + stamp(active.finished) + ", ");
+        put("ok", elapsed(active.started, active.finished));
+        put(null, " elapsed, ");
+    } else {
+        put("warn", elapsed(active.started) + " elapsed");
+        put(null, ", ");
+    }
+    put("a", String(active.done.length));
+    put(null, " of " + active.config.nodes.length + " steps closed, ");
+    put(active.open.length ? "warn" : "ok", String(active.open.length));
+    put(null, " open");
+}
+
+function drawRunNow() {
+    const host = $("#runNow");
+    host.textContent = "";
+    const R = refs(active.config);
+
+    if (active.finished) {
+        host.appendChild(el("div", "empty", "This run is closed. The timeline below is the record."));
+        return;
+    }
+    if (!active.open.length) {
+        const box = el("div", "empty", "No steps open. Finish the run to close the record.");
+        host.appendChild(box);
+        return;
+    }
+
+    active.open.forEach(id => {
+        const n = byId(id, active.config);
+        if (!n) return;
+        const card = el("div", "step t-" + n.type);
+
+        const head = el("div", "step-head");
+        head.appendChild(el("div", "ref", "#" + R[n.id]));
+        head.appendChild(el("div", "log", n.type + " / " + (laneById(n.lane, active.config).name || "lane")));
+        card.appendChild(head);
+
+        card.appendChild(el("div", "step-title", n.label || "(unnamed)"));
+        if (n.owner) {
+            const o = el("div", "step-meta");
+            o.appendChild(el("b", null, "Owner: "));
+            o.appendChild(document.createTextNode(n.owner));
+            card.appendChild(o);
+        }
+        if (n.detail) card.appendChild(el("div", "note", n.detail));
+        if (n.evidence) {
+            const ev = el("div", "step-meta");
+            ev.style.marginTop = "6px";
+            ev.appendChild(el("b", null, "Capture: "));
+            ev.appendChild(document.createTextNode(n.evidence));
+            card.appendChild(ev);
+        }
+
+        const ta = el("textarea", "field");
+        ta.rows = 2;
+        ta.style.marginTop = "10px";
+        ta.placeholder = "Notes for this step: what you found, times, IDs";
+        ta.value = drafts[n.id] || "";
+        ta.addEventListener("input", () => { drafts[n.id] = ta.value; });
+        card.appendChild(ta);
+
+        const acts = el("div", "row noprint");
+        acts.style.marginTop = "10px";
+        const mk = (label, cls, fn) => {
+            const b = el("button", "btn btn-sm" + (cls ? " " + cls : ""), label);
+            b.addEventListener("click", fn);
+            acts.appendChild(b);
+        };
+
+        if (n.type === "end") {
+            mk("Close path", "btn-primary", () => takeStep(n, null, false));
+        } else if (n.type === "decision" || n.type === "parallel") {
+            if (n.type === "parallel") {
+                mk("Start " + n.outs.length + " branches", "btn-primary", () => takeStep(n, null, false));
+            } else {
+                n.outs.forEach((o, i) => {
+                    const t = byId(o.to, active.config);
+                    const lb = o.label || "Branch " + (i + 1);
+                    const b = el("button", "btn btn-sm btn-primary", lb);
+                    b.title = t ? "Goes to #" + R[t.id] + " " + (t.label || "") : "Not linked";
+                    b.addEventListener("click", () => takeStep(n, o, false));
+                    acts.appendChild(b);
+                });
+            }
+        } else {
+            const o = n.outs[0];
+            const t = o ? byId(o.to, active.config) : null;
+            mk(t ? "Done, go to #" + R[t.id] : "Done", "btn-primary", () => takeStep(n, o || null, false));
+        }
+
+        mk("Skip", "btn-danger", () => {
+            if (!confirm("Skip this step? It is logged as skipped and this path stops here.")) return;
+            takeStep(n, null, true);
+        });
+
+        card.appendChild(acts);
+        host.appendChild(card);
+    });
+}
+
+function drawRunFlow() {
+    const host = $("#runFlowWrap");
+    if (!host || $("#runFlowPanel").hidden) { if (host) host.textContent = ""; return; }
+    const built = buildSvg(false, active.config, { now: active.open, done: active.done });
+    host.textContent = "";
+    host.appendChild(built.svg);
+}
+
+function drawTimeline() {
+    const host = $("#runTimeline");
+    host.textContent = "";
+    if (!active.entries.length) {
+        host.appendChild(el("div", "empty", "Nothing logged yet."));
+        return;
+    }
+    active.entries.forEach((e, i) => {
+        const row = el("div", "tl k-" + (e.kind || "step"));
+        row.appendChild(el("div", "tl-t", clock(e.t)));
+        row.appendChild(el("div", "tl-ref", e.ref ? "#" + e.ref : "-"));
+        const body = el("div", "tl-body");
+        body.appendChild(el("div", "tl-txt", e.text || ""));
+        if (e.note) body.appendChild(el("div", "tl-note", e.note));
+        row.appendChild(body);
+        if (!active.finished && (e.kind === "note" || e.kind === "offscript")) {
+            const x = el("button", "btn btn-sm btn-danger noprint", "x");
+            x.title = "Remove this entry";
+            x.addEventListener("click", () => {
+                if (!confirm("Remove this entry from the record?")) return;
+                active.entries.splice(i, 1);
+                saveRuns();
+                drawTimeline();
+            });
+            row.appendChild(x);
+        }
+        host.appendChild(row);
+    });
+}
+
+/* ---------- run exports ---------- */
+function runFname(ext) {
+    return `run-${slug(active.title)}-${(active.started || "").slice(0, 10)}.${ext}`;
+}
+function exportRunMd() {
+    if (!active) return;
+    const L = [], R = refs(active.config);
+    L.push("# Run record: " + active.title, "");
+    L.push("- Operator: " + (active.operator || "not recorded"));
+    L.push("- Incident ref: " + (active.ref || "not recorded"));
+    L.push("- Started: " + stamp(active.started));
+    L.push("- Finished: " + (active.finished ? stamp(active.finished) : "still open"));
+    L.push("- Elapsed: " + elapsed(active.started, active.finished));
+    const skips = active.entries.filter(e => e.kind === "skip" && e.nodeId).length;
+    L.push("- Steps closed: " + active.done.length + " of " + active.config.nodes.length +
+        (skips ? " (" + skips + " skipped)" : ""));
+    L.push("");
+    if (active.config.meta && active.config.meta.purpose) L.push("## Purpose", "", active.config.meta.purpose, "");
+
+    L.push("## Timeline", "");
+    active.entries.forEach(e => {
+        L.push(`- **${clock(e.t)}**${e.ref ? " #" + e.ref : ""} ${e.text || ""}`);
+        if (e.note) String(e.note).split(/\r?\n/).forEach(l => L.push("  - " + l));
+    });
+    L.push("");
+
+    if (active.open.length) {
+        L.push("## Still open", "");
+        active.open.forEach(id => {
+            const n = byId(id, active.config);
+            if (n) L.push(`- #${R[n.id]} ${n.label || "(unnamed)"}`);
+        });
+        L.push("");
+    }
+
+    const touched = {};
+    active.entries.forEach(e => { if (e.nodeId) touched[e.nodeId] = true; });
+    const unreached = active.config.nodes.filter(n =>
+        active.done.indexOf(n.id) < 0 && active.open.indexOf(n.id) < 0 && !touched[n.id]);
+    if (unreached.length) {
+        L.push("## Not reached", "");
+        unreached.forEach(n => L.push(`- #${R[n.id]} ${n.label || "(unnamed)"} (${n.type})`));
+        L.push("");
+    }
+
+    L.push("---", "", `Recorded with ${APP.id} v${APP.version}.`, "");
+    download(runFname("md"), L.join("\n"), "text/markdown;charset=utf-8");
+    notify("Run record exported");
+}
+function exportRunJson() {
+    if (!active) return;
+    const out = { app: APP.id + "-run", schema: APP.schema, version: APP.version, exported: new Date().toISOString(), run: active };
+    download(runFname("json"), JSON.stringify(out, null, 2), "application/json");
+    notify("Run exported");
+}
+
+/* ---------- run tab wiring ---------- */
+(function wireRun() {
+    const zone = $("#runDrop"), input = $("#runFile");
+    zone.addEventListener("click", () => input.click());
+    zone.addEventListener("keydown", e => {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); input.click(); }
+    });
+    input.addEventListener("change", () => {
+        if (input.files[0]) read(input.files[0], importConfig);
+        input.value = "";
+    });
+    zone.addEventListener("dragover", e => { e.preventDefault(); zone.classList.add("over"); });
+    zone.addEventListener("dragleave", () => zone.classList.remove("over"));
+    zone.addEventListener("drop", e => {
+        e.preventDefault();
+        zone.classList.remove("over");
+        if (e.dataTransfer.files[0]) read(e.dataTransfer.files[0], importConfig);
+    });
+
+    $("#btnUseCurrent").addEventListener("click", () => {
+        if (!state.nodes.length) { notify("Nothing to add, build a flow first", true); return; }
+        addToLib(JSON.parse(JSON.stringify({ meta: state.meta, lanes: state.lanes, nodes: state.nodes })),
+            state.meta.title);
+    });
+
+    $("#rOperator").addEventListener("input", e => {
+        if (!active) return;
+        active.operator = e.target.value;
+        store.set("operator", e.target.value);
+        saveRuns();
+    });
+    $("#rRef").addEventListener("input", e => {
+        if (!active) return;
+        active.ref = e.target.value;
+        saveRuns();
+        drawRunsList();
+    });
+
+    $("#btnOffStep").addEventListener("click", () => {
+        if (!active) return;
+        const lbl = $("#offLabel").value.trim();
+        const note = $("#offNote").value.trim();
+        if (!lbl) { notify("Give the off-script step a name", true); return; }
+        logEntry(active, { kind: "offscript", text: "Off script: " + lbl, note });
+        $("#offLabel").value = "";
+        $("#offNote").value = "";
+        saveRuns();
+        drawTimeline();
+        notify("Logged");
+    });
+    $("#btnOffNote").addEventListener("click", () => {
+        if (!active) return;
+        const note = $("#offNote").value.trim(), lbl = $("#offLabel").value.trim();
+        if (!note && !lbl) { notify("Nothing to log", true); return; }
+        logEntry(active, { kind: "note", text: lbl || "Note", note });
+        $("#offLabel").value = "";
+        $("#offNote").value = "";
+        saveRuns();
+        drawTimeline();
+        notify("Logged");
+    });
+
+    $("#btnRunFinish").addEventListener("click", finishRun);
+    $("#btnRunMd").addEventListener("click", exportRunMd);
+    $("#btnRunJson").addEventListener("click", exportRunJson);
+    $("#btnRunPrint").addEventListener("click", () => window.print());
+    $("#btnRunClose").addEventListener("click", () => {
+        active = null;
+        saveRuns();
+        drawRunTab();
+    });
+    $("#btnRunBig").addEventListener("click", () => {
+        if (!active) return;
+        const built = buildSvg(false, active.config, { now: active.open, done: active.done });
+        built.svg.removeAttribute("width");
+        built.svg.removeAttribute("height");
+        const host = $("#bigHost");
+        host.textContent = "";
+        host.appendChild(built.svg);
+        $("#bigTitle").textContent = active.title + " (position)";
+        $("#overlay").classList.add("show");
+    });
+
+    setInterval(() => { if (active && !active.finished) updateRunMeta(); }, 30000);
+})();
+
+restore();
+render();
+loadRunData();
+drawRunTab();
+document.documentElement.dataset.print = "build";
+</script>
+</body>
+</html>
