@@ -9,7 +9,7 @@ Light and dark, switched from the header.
 
 ### Build
 
-![Build tab](screenshot-build.png)
+![Build tab](docs/screenshot-build.png)
 
 - Steps are cards: give each one a label, a type and a swimlane, then point it at what comes next.
 - Types: `start`, `action`, `decision` (path splits on an outcome), `parallel` (several things happen at once), `end`.
@@ -19,7 +19,7 @@ Light and dark, switched from the header.
 
 ### Flowchart
 
-![Flowchart tab](screenshot-flowchart.png)
+![Flowchart tab](docs/screenshot-flowchart.png)
 
 - Laid out automatically from the step list, no positioning needed. Drag a box or a branch label to move it;
   Reset layout clears every nudge.
@@ -30,7 +30,7 @@ Light and dark, switched from the header.
 
 ### Runbook
 
-![Runbook tab](screenshot-runbook.png)
+![Runbook tab](docs/screenshot-runbook.png)
 
 - The same steps with the detail a runbook needs: owner, evidence to capture, and how to actually do it.
 - Editing a label or an outcome here updates the flowchart, and the other way round.
@@ -38,7 +38,7 @@ Light and dark, switched from the header.
 
 ### Run
 
-![Run tab](screenshot-run.png)
+![Run tab](docs/screenshot-run.png)
 
 - Import a config (drag the JSON in, or add the flow you are building) and it stays in a list in this browser.
 - Once a run starts the process list collapses out of the way, leaving the live steps, a running clock and
@@ -56,7 +56,7 @@ Light and dark, switched from the header.
 
 ### Timeline
 
-![Timeline tab](screenshot-timeline.png)
+![Timeline tab](docs/screenshot-timeline.png)
 
 - For incidents that do not follow a process. No template, no steps to close, just the record.
 - Each event takes a time, a source (where you saw it), a one-line summary and as much detail as you want.
