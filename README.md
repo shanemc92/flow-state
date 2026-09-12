@@ -6,22 +6,35 @@ no dependencies, no network calls. Open it from disk or serve it as a static pag
 ## What it does
 
 **build tab**
+
+![screenshot-build](docs/screenshot-build.png)
+
 - Steps are cards: give each one a label, a type and a swimlane, then point it at what comes next.
 - Types: `start`, `action`, `decision` (path splits on an outcome), `parallel` (several things happen at once), `end`.
 - Swimlanes are columns, for separate workstreams running alongside each other.
-- The flowchart is laid out automatically from the step list. Drag a box to nudge it, Reset layout to clear the nudges.
+- The flowchart is laid out automatically from the step list. Drag a box or a branch label to move it,
+  Reset layout to clear every nudge.
+- Edges that skip past a row route around the side instead of through the boxes in between, and branch labels sit in their own tag so they stay readable.
 - Scroll inside the frame, zoom, or open Full preview for the whole chart at once.
 - Export SVG or PNG, or print.
 
 **runbook tab**
+
+![screenshot-runbook](docs/screenshot-runbook.png)
+
 - The same steps with the detail a runbook needs: owner, evidence to capture, and how to actually do it.
 - Editing a label or an outcome here updates the flowchart, and the other way round.
 - Export Markdown writes the whole runbook out as one `.md` file, or print it straight from the tab.
 
 **run tab**
+
+![screenshot-run](docs/screenshot-run.png)
+
 - Import a config (drag the JSON in, or add the flow you are building) and it stays in a list in this browser.
 - Start a run and the tool walks the flow: only the steps that are live right now are shown, with the owner,
   the detail and what evidence to capture.
+- Live steps are grouped under their swimlane, so parallel workstreams stay visibly separate rather than
+  landing in one pile.
 - Decisions show one button per outcome. Parallel steps open every branch at once. Each step takes a note
   before you close it, and every choice, note and skip is timestamped.
 - Off-script actions get logged against the timeline rather than being lost.

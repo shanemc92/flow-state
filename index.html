@@ -350,13 +350,12 @@ label.f {
 .nd-box text { fill: var(--fg); font-family: var(--font); font-size: 12px; }
 .nd-box .nd-kind { fill: var(--fg-faint); font-size: 9.5px; letter-spacing: 0.08em; }
 .nd-box .nd-ref  { fill: var(--fg-dim); font-size: 9.5px; }
-.nd-box { cursor: grab; }
+.nd-box, .el-box { cursor: grab; touch-action: none; }
+.el-box.dragging .elabel-bg { stroke: var(--accent); }
 .nd-box.dragging { cursor: grabbing; }
 .edge { fill: none; stroke: var(--fg-faint); stroke-width: 1.4; }
-.elabel {
-    fill: var(--fg-dim); font-family: var(--font); font-size: 10.5px;
-    paint-order: stroke; stroke: var(--raised); stroke-width: 3px;
-}
+.elabel { fill: var(--fg-dim); font-family: var(--font); font-size: 10.5px; }
+.elabel-bg { fill: var(--raised); stroke: var(--line-soft); stroke-width: 1; }
 .lane-band { fill: none; stroke: var(--line); stroke-dasharray: 4 4; }
 .nd-now rect, .nd-now polygon { stroke: var(--accent); stroke-width: 3; }
 .nd-done rect, .nd-done polygon { opacity: 0.4; }
@@ -390,6 +389,26 @@ label.f {
 }
 .badge.live { color: var(--ok); border-color: var(--ok); }
 .badge.shut { color: var(--fg-faint); }
+
+.lane-group { margin-bottom: 18px; }
+.lane-group:last-child { margin-bottom: 0; }
+.lane-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding: 7px 11px;
+    font-size: 11px;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    color: var(--fg);
+    background: var(--sunken);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    border-radius: var(--radius-sm);
+}
+.lane-head .k { color: var(--fg-faint); }
+.lane-group .step { margin-left: 14px; }
 
 .tl {
     display: flex;
@@ -601,7 +620,7 @@ label.f {
                     </div>
                 </div>
                 <div class="canvas-wrap" id="canvasWrap"></div>
-                <div class="note noprint" style="margin-top:10px">Drag a box to nudge it. Scroll inside the frame to move around.</div>
+                <div class="note noprint" style="margin-top:10px">Drag a box or a branch label to move it. Scroll inside the frame to pan, or open Full preview to see the whole thing.</div>
             </div>
 
             <div class="panel">
@@ -889,7 +908,11 @@ function normalise(d) {
         n.detail = n.detail || "";
         n.evidence = n.evidence || "";
         n.outs = Array.isArray(n.outs) ? n.outs : [];
-        n.outs.forEach(o => { o.label = o.label || ""; o.to = o.to || ""; });
+        n.outs.forEach(o => {
+            o.label = o.label || "";
+            o.to = o.to || "";
+            o.pos = o.pos && typeof o.pos === "object" ? { dx: +o.pos.dx || 0, dy: +o.pos.dy || 0 } : { dx: 0, dy: 0 };
+        });
         n.pos = n.pos && typeof n.pos === "object" ? { dx: +n.pos.dx || 0, dy: +n.pos.dy || 0 } : { dx: 0, dy: 0 };
     });
     s.zoom = +s.zoom || 1;
@@ -974,12 +997,29 @@ function wrap(text, maxChars) {
 function measure(n) {
     const diamond = n.type === "decision";
     const w = diamond ? 232 : (n.type === "parallel" ? 214 : 200);
-    const inner = diamond ? Math.floor((w * 0.56) / CHW) : Math.floor((w - 24) / CHW);
+    const pad = diamond ? w * 0.44 : (n.type === "parallel" ? 46 : 24);
+    const inner = Math.floor((w - pad) / CHW);
     const lines = wrap(n.label, inner);
     const h = diamond
-        ? Math.max(96, lines.length * 17 + 60)
-        : Math.max(54, lines.length * 17 + 28);
+        ? Math.max(108, lines.length * 17 + 78)
+        : Math.max(62, lines.length * 17 + 44);
     return { w, h, lines, diamond };
+}
+
+function elbow(pts, r) {
+    const p = pts.filter((q, i) => i === 0 || Math.abs(q[0] - pts[i - 1][0]) > 0.5 || Math.abs(q[1] - pts[i - 1][1]) > 0.5);
+    if (p.length < 2) return "";
+    let d = `M${p[0][0]},${p[0][1]}`;
+    for (let i = 1; i < p.length - 1; i++) {
+        const [px, py] = p[i - 1], [cx, cy] = p[i], [nx, ny] = p[i + 1];
+        const d1 = Math.hypot(cx - px, cy - py), d2 = Math.hypot(nx - cx, ny - cy);
+        if (!d1 || !d2) continue;
+        const rr = Math.min(r, d1 / 2, d2 / 2);
+        d += ` L${(cx + (px - cx) / d1 * rr).toFixed(1)},${(cy + (py - cy) / d1 * rr).toFixed(1)}`;
+        d += ` Q${cx},${cy} ${(cx + (nx - cx) / d2 * rr).toFixed(1)},${(cy + (ny - cy) / d2 * rr).toFixed(1)}`;
+    }
+    const last = p[p.length - 1];
+    return d + ` L${last[0]},${last[1]}`;
 }
 
 function depths(src) {
@@ -1044,7 +1084,7 @@ function layout(src) {
         };
     });
 
-    return { boxes, laneX, laneW, totalW, totalH, top: PAD };
+    return { boxes, laneX, laneW, totalW, totalH, top: PAD, depth: d };
 }
 
 /* ============================================================
@@ -1054,7 +1094,6 @@ function buildSvg(standalone, src, mark) {
     const G = src || state;
     const L = layout(G);
     const svg = sv("svg");
-    svg.setAttribute("xmlns", NS);
     svg.setAttribute("viewBox", `0 0 ${L.totalW} ${L.totalH}`);
     svg.setAttribute("width", L.totalW);
     svg.setAttribute("height", L.totalH);
@@ -1111,7 +1150,8 @@ function buildSvg(standalone, src, mark) {
 
     /* edges */
     const R = refs(G);
-    let chan = 0;
+    let chan = 0, edgeRight = 0;
+    const labelEls = [];
     G.nodes.forEach(n => {
         const a = L.boxes[n.id];
         if (!a) return;
@@ -1119,33 +1159,54 @@ function buildSvg(standalone, src, mark) {
         n.outs.forEach((o, i) => {
             const b = L.boxes[o.to];
             if (!b) return;
-            const sx = a.x + a.w * (i + 1) / (cnt + 1);
+            const sx = a.diamond ? a.x + a.w / 2 : a.x + a.w * (i + 1) / (cnt + 1);
             const sy = a.y + a.h;
             const tx = b.x + b.w / 2;
             const ty = b.y;
             const p = sv("path", "edge");
-            let d;
-            if (ty > sy + 8) {
-                if (Math.abs(tx - sx) < 3) d = `M${sx},${sy} L${tx},${ty - 2}`;
+            let pts;
+            const skips = (L.depth[o.to] || 0) - (L.depth[n.id] || 0) > 1;
+            if (ty > sy + 8 && !skips) {
+                if (Math.abs(tx - sx) < 3) pts = [[sx, sy], [tx, ty - 2]];
                 else {
-                    const my = sy + (ty - sy) / 2;
-                    d = `M${sx},${sy} L${sx},${my} L${tx},${my} L${tx},${ty - 2}`;
+                    const my = sy + Math.max(24, (ty - sy) / 2);
+                    pts = [[sx, sy], [sx, my], [tx, my], [tx, ty - 2]];
                 }
             } else {
                 chan++;
-                const cx = Math.max(a.x + a.w, b.x + b.w) + 22 + chan * 12;
-                d = `M${sx},${sy} L${sx},${sy + 16} L${cx},${sy + 16} L${cx},${ty - 22} L${tx},${ty - 22} L${tx},${ty - 2}`;
+                const cx = Math.max(a.x + a.w, b.x + b.w) + 22 + chan * 14;
+                pts = [[sx, sy], [sx, sy + 18], [cx, sy + 18], [cx, ty - 26], [tx, ty - 26], [tx, ty - 2]];
             }
-            p.setAttribute("d", d);
+            pts.forEach(q => { if (q[0] > edgeRight) edgeRight = q[0]; });
+            p.setAttribute("d", elbow(pts, 9));
             p.setAttribute("marker-end", "url(#arrow)");
             svg.appendChild(p);
 
             if (o.label) {
+                const right = tx >= sx;
+                const txt = o.label.length > 28 ? o.label.slice(0, 27) + "\u2026" : o.label;
+                const lw = txt.length * 7 + 12;
+                const off = o.pos || { dx: 0, dy: 0 };
+                const ly = sy + 15 + i * 18 + off.dy;
+                const lx = (right ? sx + 8 : sx - 8 - lw) + off.dx;
+                const lg = sv("g", "el-box");
+                lg.dataset.node = n.id;
+                lg.dataset.out = String(i);
+                const bg = sv("rect", "elabel-bg");
+                bg.setAttribute("x", lx.toFixed(1));
+                bg.setAttribute("y", (ly - 11).toFixed(1));
+                bg.setAttribute("width", lw.toFixed(1));
+                bg.setAttribute("height", 16);
+                bg.setAttribute("rx", 4);
+                lg.appendChild(bg);
                 const t = sv("text", "elabel");
-                t.setAttribute("x", sx + 6);
-                t.setAttribute("y", sy + 15);
-                t.textContent = o.label;
-                svg.appendChild(t);
+                t.setAttribute("x", (lx + lw / 2).toFixed(1));
+                t.setAttribute("y", (ly + 1).toFixed(1));
+                t.setAttribute("text-anchor", "middle");
+                t.textContent = txt;
+                lg.appendChild(t);
+                labelEls.push(lg);
+                if (lx + lw > edgeRight) edgeRight = lx + lw;
             }
         });
     });
@@ -1183,21 +1244,23 @@ function buildSvg(standalone, src, mark) {
             g.appendChild(r);
         }
 
+        const kindY = b.y + (b.diamond ? 30 : 18);
+        const refY = b.y + b.h - (b.diamond ? 24 : 10);
         const kind = sv("text", "nd-kind");
         kind.setAttribute("x", b.x + b.w / 2);
-        kind.setAttribute("y", b.y + (b.diamond ? 26 : 17));
+        kind.setAttribute("y", kindY);
         kind.setAttribute("text-anchor", "middle");
         kind.textContent = n.type.toUpperCase();
         g.appendChild(kind);
 
         const rf = sv("text", "nd-ref");
         rf.setAttribute("x", b.x + b.w / 2);
-        rf.setAttribute("y", b.y + b.h - (b.diamond ? 20 : 9));
+        rf.setAttribute("y", refY);
         rf.setAttribute("text-anchor", "middle");
         rf.textContent = "#" + R[n.id];
         g.appendChild(rf);
 
-        const startY = b.y + b.h / 2 - ((b.lines.length - 1) * 17) / 2 + 4;
+        const startY = (kindY + 12 + refY - 12) / 2 - ((b.lines.length - 1) * 17) / 2 + 3;
         b.lines.forEach((ln, i) => {
             const t = sv("text");
             t.setAttribute("x", b.x + b.w / 2);
@@ -1210,6 +1273,14 @@ function buildSvg(standalone, src, mark) {
         svg.appendChild(g);
     });
 
+    labelEls.forEach(lg => svg.appendChild(lg));
+
+    if (edgeRight + 18 > L.totalW) {
+        L.totalW = Math.round(edgeRight + 18);
+        svg.setAttribute("viewBox", `0 0 ${L.totalW} ${L.totalH}`);
+        svg.setAttribute("width", L.totalW);
+        svg.setAttribute("height", L.totalH);
+    }
     return { svg, L };
 }
 
@@ -1225,7 +1296,8 @@ function exportCss() {
         ".nd-box .nd-ref{fill:#666;font-size:9.5px}",
         ".edge{fill:none;stroke:#666;stroke-width:1.4}",
         ".arrowhead{fill:#666;stroke:none}",
-        ".elabel{fill:#444;font-family:monospace;font-size:10.5px;paint-order:stroke;stroke:#fff;stroke-width:3px}",
+        ".elabel{fill:#444;font-family:monospace;font-size:10.5px}",
+        ".elabel-bg{fill:#fff;stroke:#ddd;stroke-width:1}",
         ".lane-band{fill:none;stroke:#bbb;stroke-dasharray:4 4}",
         ".lane-name{fill:#666;font-family:monospace;font-size:10.5px;letter-spacing:.08em}",
         "svg{background:#fff}"
@@ -1249,31 +1321,43 @@ function drawCanvas() {
 function wireDrag(svg) {
     let drag = null;
     svg.addEventListener("pointerdown", e => {
-        const g = e.target.closest(".nd-box");
+        const g = e.target.closest(".nd-box, .el-box");
         if (!g) return;
-        const n = byId(g.dataset.id);
-        if (!n) return;
-        drag = { n, x: e.clientX, y: e.clientY, dx: n.pos.dx, dy: n.pos.dy, g };
+        let pos = null;
+        if (g.classList.contains("nd-box")) {
+            const n = byId(g.dataset.id);
+            if (n) pos = n.pos;
+        } else {
+            const n = byId(g.dataset.node);
+            const o = n && n.outs[+g.dataset.out];
+            if (o) pos = (o.pos = o.pos || { dx: 0, dy: 0 });
+        }
+        if (!pos) return;
+        drag = { pos, g, x: e.clientX, y: e.clientY, dx: pos.dx, dy: pos.dy, mx: 0, my: 0 };
         g.classList.add("dragging");
-        svg.setPointerCapture(e.pointerId);
+        try { g.setPointerCapture(e.pointerId); } catch (err) {}
         e.preventDefault();
     });
     svg.addEventListener("pointermove", e => {
         if (!drag) return;
         const z = state.zoom || 1;
-        drag.n.pos.dx = Math.round(drag.dx + (e.clientX - drag.x) / z);
-        drag.n.pos.dy = Math.round(drag.dy + (e.clientY - drag.y) / z);
-        drawCanvas();
+        drag.mx = (e.clientX - drag.x) / z;
+        drag.my = (e.clientY - drag.y) / z;
+        drag.g.setAttribute("transform", `translate(${Math.round(drag.mx)},${Math.round(drag.my)})`);
         e.preventDefault();
     });
     const stop = () => {
         if (!drag) return;
+        drag.pos.dx = Math.round(drag.dx + drag.mx);
+        drag.pos.dy = Math.round(drag.dy + drag.my);
         drag.g.classList.remove("dragging");
         drag = null;
         persist();
+        drawCanvas();
     };
     svg.addEventListener("pointerup", stop);
     svg.addEventListener("pointercancel", stop);
+    svg.addEventListener("lostpointercapture", stop);
 }
 
 /* ============================================================
@@ -1806,7 +1890,10 @@ $("#btnFit").addEventListener("click", () => {
     setZoom(Math.min(1.4, w / currentL.totalW));
 });
 $("#btnNudgeReset").addEventListener("click", () => {
-    state.nodes.forEach(n => n.pos = { dx: 0, dy: 0 });
+    state.nodes.forEach(n => {
+        n.pos = { dx: 0, dy: 0 };
+        n.outs.forEach(o => o.pos = { dx: 0, dy: 0 });
+    });
     persist(); drawCanvas();
     notify("Layout reset");
 });
@@ -2114,14 +2201,16 @@ function drawRunNow() {
         return;
     }
 
-    active.open.forEach(id => {
-        const n = byId(id, active.config);
-        if (!n) return;
+    const cfg = active.config;
+    const multi = cfg.lanes.length > 1;
+
+    const makeCard = n => {
         const card = el("div", "step t-" + n.type);
 
         const head = el("div", "step-head");
         head.appendChild(el("div", "ref", "#" + R[n.id]));
-        head.appendChild(el("div", "log", n.type + " / " + (laneById(n.lane, active.config).name || "lane")));
+        if (multi) head.appendChild(el("span", "badge", laneById(n.lane, cfg).name || "lane"));
+        head.appendChild(el("div", "log", n.type));
         card.appendChild(head);
 
         card.appendChild(el("div", "step-title", n.label || "(unnamed)"));
@@ -2183,7 +2272,30 @@ function drawRunNow() {
         });
 
         card.appendChild(acts);
-        host.appendChild(card);
+        return card;
+    };
+
+    const laneOrder = cfg.lanes.map(l => l.id);
+    const open = active.open.map(id => byId(id, cfg)).filter(Boolean);
+    open.sort((a, b) => laneOrder.indexOf(a.lane) - laneOrder.indexOf(b.lane));
+
+    if (!multi) {
+        open.forEach(n => host.appendChild(makeCard(n)));
+        return;
+    }
+
+    cfg.lanes.forEach(l => {
+        const mine = open.filter(n => n.lane === l.id);
+        if (!mine.length) return;
+        const group = el("div", "lane-group");
+        const head = el("div", "lane-head");
+        head.appendChild(el("span", "k", "lane"));
+        head.appendChild(el("span", null, l.name || "lane"));
+        head.appendChild(el("div", "spacer"));
+        head.appendChild(el("span", "badge", mine.length + (mine.length === 1 ? " step open" : " steps open")));
+        group.appendChild(head);
+        mine.forEach(n => group.appendChild(makeCard(n)));
+        host.appendChild(group);
     });
 }
 
