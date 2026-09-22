@@ -1006,7 +1006,9 @@ td .field { padding: 5px 8px; }
 /* .block separates its sections with a top border and its own padding, which
    already provides the rhythm inside the card, so the panel's own padding is
    trimmed to avoid doubling the gap at the top and bottom. */
-.buildmain.panel, .buildside.panel { padding: 4px var(--pad) var(--pad); }
+.buildmain.panel, .buildside.panel,
+#pane-runbook.panel, #pane-about.panel,
+#chartPanel.panel { padding: 4px var(--pad) var(--pad); }
 .split .buildside .block { border-top: 0; padding-top: 4px; }
 
 #pane-about { max-width: var(--read); margin: 0 auto; }
@@ -1300,6 +1302,12 @@ section > .block:first-child { border-top: 0; padding-top: 4px; }
     .canvas-wrap svg { width: 100%; height: auto; }
     #runTlPanel { max-height: none; overflow: visible; }
     #runHeadPanel, #runFlowPanel, #runTlPanel { border: none; padding: 0; }
+    /* The on-screen cards are a screen affordance. On paper the page itself is
+       the surface, so they drop their border, fill and padding rather than
+       printing a box around the content. */
+    .buildmain.panel, .buildside.panel,
+    #pane-runbook.panel, #pane-about.panel,
+    #chartPanel.panel { border: none; background: none; padding: 0; }
     .block, .step, .tl, .lane-group { break-inside: avoid; page-break-inside: avoid; }
     .field { border-color: #bbb; }
     html[data-print="build"]   #pane-timeline,
@@ -1545,7 +1553,7 @@ section > .block:first-child { border-top: 0; padding-top: 4px; }
             </div>
 
             <div id="flowHost">
-            <div class="block" id="chartPanel">
+            <div class="block panel" id="chartPanel">
                 <div class="canvas-wrap" id="canvasWrap"></div>
                 <div class="note noprint" style="margin-top:10px">Drag a box or a branch label to move it. Scroll inside the frame to pan, or open Full preview to see the whole thing.</div>
             </div>
@@ -1554,7 +1562,7 @@ section > .block:first-child { border-top: 0; padding-top: 4px; }
         </section>
 
         <!-- ============================ RUNBOOK ============================ -->
-        <section id="pane-runbook" role="tabpanel" aria-labelledby="tab-runbook" hidden>
+        <section id="pane-runbook" class="panel" role="tabpanel" aria-labelledby="tab-runbook" hidden>
 
             <div class="block">
                 <div class="section-header">
@@ -1749,7 +1757,7 @@ section > .block:first-child { border-top: 0; padding-top: 4px; }
         </section>
 
         <!-- ============================ ABOUT ============================ -->
-        <section id="pane-about" role="tabpanel" aria-labelledby="tab-about" hidden>
+        <section id="pane-about" class="panel" role="tabpanel" aria-labelledby="tab-about" hidden>
             <div class="block">
                 <div class="section-header"><span>What this is</span></div>
                 <div class="note">
