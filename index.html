@@ -1003,6 +1003,10 @@ td .field { padding: 5px 8px; }
 .buildmain, .buildside { min-width: 0; }
 .split .buildside { position: sticky; top: calc(var(--bar) + 14px); }
 .buildside:empty { display: none; }
+/* .block separates its sections with a top border and its own padding, which
+   already provides the rhythm inside the card, so the panel's own padding is
+   trimmed to avoid doubling the gap at the top and bottom. */
+.buildmain.panel, .buildside.panel { padding: 4px var(--pad) var(--pad); }
 .split .buildside .block { border-top: 0; padding-top: 4px; }
 
 #pane-about { max-width: var(--read); margin: 0 auto; }
@@ -1476,7 +1480,7 @@ section > .block:first-child { border-top: 0; padding-top: 4px; }
             </div>
 
             <div class="buildwrap">
-            <div class="buildmain">
+            <div class="buildmain panel">
 
 
             <div class="block">
@@ -1519,7 +1523,7 @@ section > .block:first-child { border-top: 0; padding-top: 4px; }
                 <div class="log" style="margin-top:10px" id="stat"></div>
             </div>
             </div>
-            <div class="buildside" id="splitHost"></div>
+            <div class="buildside panel" id="splitHost"></div>
             </div>
 
         </section>
